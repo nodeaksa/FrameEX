@@ -202,25 +202,25 @@
     <!-- Left / Center: Sticky Mobile (56vh) & Desktop Preview Canvas Stage -->
     <section
       id="dropZoneStage"
-      class="sticky top-0 lg:static z-20 h-[56vh] lg:h-auto lg:max-h-none flex-1 studio-grid-bg backdrop-blur-md border-b border-slate-200 dark:border-[#262B36] lg:border-b-0 flex flex-col justify-between p-2.5 sm:p-4 lg:p-8 overflow-hidden select-none transition-colors duration-200"
+      class="relative lg:static z-20 h-[56vh] lg:h-auto lg:max-h-none flex-1 studio-grid-bg backdrop-blur-md border-b border-slate-200 dark:border-[#262B36] lg:border-b-0 flex flex-col justify-between p-2.5 sm:p-4 lg:p-8 overflow-hidden select-none transition-colors duration-200"
     >
       <!-- Top Status Telemetry Bar -->
-      <div class="relative z-10 flex flex-wrap items-center justify-between gap-1.5 mb-1.5">
-        <div class="flex items-center gap-1.5 flex-wrap">
+      <div class="relative z-10 flex flex-wrap items-center justify-between gap-1.5 mb-2 min-w-0">
+        <div class="flex items-center gap-1.5 flex-wrap min-w-0">
           <!-- Detected Source Format Badge -->
           <div id="formatBadge" class="hidden items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-[11px] font-mono font-semibold bg-indigo-500/15 border border-indigo-500/30 text-indigo-700 dark:text-indigo-300 backdrop-blur-sm">
             <span id="formatText">JPEG</span>
           </div>
 
           <!-- EXIF Status Pill -->
-          <div id="exifStatusBadge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium bg-white/90 dark:bg-[#14171D]/90 border border-slate-200 dark:border-[#262B36] text-slate-700 dark:text-slate-300 backdrop-blur-sm shadow-sm">
+          <div id="exifStatusBadge" class="inline-flex items-center gap-1.5 max-w-[62vw] px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium bg-white/90 dark:bg-[#14171D]/90 border border-slate-200 dark:border-[#262B36] text-slate-700 dark:text-slate-300 backdrop-blur-sm shadow-sm">
             <span class="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-500"></span>
-            <span>Waiting for photo</span>
+            <span class="truncate">Waiting for photo</span>
           </div>
         </div>
 
         <!-- Output Resolution Pill -->
-        <div id="resolutionBadge" class="hidden items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-[11px] font-mono bg-white/90 dark:bg-[#14171D]/90 border border-slate-200 dark:border-[#262B36] text-slate-700 dark:text-slate-300 backdrop-blur-sm shadow-sm">
+        <div id="resolutionBadge" class="hidden shrink-0 items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-[11px] font-mono bg-white/90 dark:bg-[#14171D]/90 border border-slate-200 dark:border-[#262B36] text-slate-700 dark:text-slate-300 backdrop-blur-sm shadow-sm">
           <i data-lucide="maximize-2" class="w-3 h-3 text-indigo-500 dark:text-indigo-400"></i>
           <span id="resolutionText">0 × 0 px</span>
         </div>
@@ -308,10 +308,10 @@
     </section>
 
     <!-- Right: Scrollable Inspector Panel -->
-    <aside class="w-full lg:w-[410px] xl:w-[440px] bg-white dark:bg-[#14171D] lg:border-l border-slate-200 dark:border-[#262B36] flex flex-col lg:h-full shrink-0 transition-colors duration-200">
+    <aside class="relative w-full lg:w-[410px] xl:w-[440px] bg-white dark:bg-[#14171D] lg:border-l border-slate-200 dark:border-[#262B36] flex flex-col lg:h-full shrink-0 transition-colors duration-200">
 
       <!-- Inspector Section Filter Tabs -->
-      <div class="sticky top-[56vh] lg:top-0 z-10 bg-white/95 dark:bg-[#14171D]/95 backdrop-blur-md border-b border-slate-200 dark:border-[#262B36] px-4 py-2.5 flex items-center gap-1 overflow-x-auto">
+      <div class="sticky top-0 z-30 bg-white/95 dark:bg-[#14171D]/95 backdrop-blur-md border-b border-slate-200 dark:border-[#262B36] px-4 py-2.5 flex items-center gap-1 overflow-x-auto shadow-sm">
         <button type="button" data-tab="all" class="inspector-tab active px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition cursor-pointer">All</button>
         <button type="button" data-tab="presets" class="inspector-tab px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1E232D] transition cursor-pointer">Presets</button>
         <button type="button" data-tab="exif" class="inspector-tab px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1E232D] transition cursor-pointer">EXIF Data</button>
@@ -917,7 +917,7 @@
             }
           };
           const current = map[state.exifStatus] || map.idle;
-          el.exifStatusBadge.innerHTML = `<span class="w-2 h-2 rounded-full ${current.dot}"></span><span>${current.text}</span>`;
+          el.exifStatusBadge.innerHTML = `<span class="w-2 h-2 rounded-full shrink-0 ${current.dot}"></span><span class="truncate">${current.text}</span>`;
 
           // Update GPS hint label
           if (state.exifStatus === 'idle') {
