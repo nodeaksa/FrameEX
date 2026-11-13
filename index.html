@@ -682,6 +682,25 @@
           </div>
         </div>
 
+        <!-- Small non-intrusive project support link -->
+        <div class="rounded-xl bg-amber-50/80 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-500/20 p-3">
+          <a
+            href="https://saweria.co/aksa30"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex items-center gap-3 rounded-lg px-2 py-1.5 text-amber-900 dark:text-amber-100 hover:bg-amber-100/80 dark:hover:bg-amber-900/20 transition"
+            title="Traktir kopi lewat Saweria"
+          >
+            <span class="w-9 h-9 rounded-lg bg-amber-100 dark:bg-amber-500/15 border border-amber-200 dark:border-amber-500/25 flex items-center justify-center shrink-0">
+              <i data-lucide="coffee" class="w-4 h-4 text-amber-600 dark:text-amber-300"></i>
+            </span>
+            <span class="min-w-0">
+              <span class="block text-xs font-semibold">Traktir kopi</span>
+              <span class="block text-[11px] text-amber-700/80 dark:text-amber-200/70 truncate">Support FramEX via Saweria</span>
+            </span>
+          </a>
+        </div>
+
       </div>
     </aside>
   </main>
@@ -1075,13 +1094,43 @@
         /**
          * Format decimal GPS latitude & longitude into readable EXIF coordinates
          */
-        function formatGpsCoords(lat, lon) {
-          if (typeof lat !== 'number' || typeof lon !== 'number' || isNaN(lat) || isNaN(lon)) {
-            return '';
+        function coordinateToDecimal(value, ref = '') {
+          if (value === null || value === undefined || value === '') return null;
+
+          let decimal;
+          if (Array.isArray(value)) {
+            const parts = value.map(Number).filter(Number.isFinite);
+            if (parts.length >= 3) {
+              decimal = Math.abs(parts[0]) + parts[1] / 60 + parts[2] / 3600;
+            } else if (parts.length === 1) {
+              decimal = parts[0];
+            }
+          } else if (typeof value === 'object' && value !== null) {
+            const parts = [value.degrees, value.minutes, value.seconds].map(Number);
+            if (parts.every(Number.isFinite)) {
+              decimal = Math.abs(parts[0]) + parts[1] / 60 + parts[2] / 3600;
+            }
+          } else if (typeof value === 'string' && value.includes('/')) {
+            const fraction = value.match(/^\s*(-?\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)\s*$/);
+            decimal = fraction ? Number(fraction[1]) / Number(fraction[2]) : Number(value);
+          } else {
+            decimal = Number(value);
           }
-          const latDir = lat >= 0 ? 'N' : 'S';
-          const lonDir = lon >= 0 ? 'E' : 'W';
-          return `${Math.abs(lat).toFixed(4)}° ${latDir}, ${Math.abs(lon).toFixed(4)}° ${lonDir}`;
+
+          if (!Number.isFinite(decimal)) return null;
+          const direction = String(ref || '').toUpperCase().trim();
+          if (direction === 'S' || direction === 'W') decimal = -Math.abs(decimal);
+          return decimal;
+        }
+
+        function formatGpsCoords(lat, lon, latRef = '', lonRef = '') {
+          const latitude = coordinateToDecimal(lat, latRef);
+          const longitude = coordinateToDecimal(lon, lonRef);
+          if (latitude === null || longitude === null) return '';
+
+          const latDir = latitude >= 0 ? 'N' : 'S';
+          const lonDir = longitude >= 0 ? 'E' : 'W';
+          return `${Math.abs(latitude).toFixed(4)}° ${latDir}, ${Math.abs(longitude).toFixed(4)}° ${lonDir}`;
         }
 
         /**
@@ -1097,7 +1146,8 @@
                 pick: [
                   'Make', 'Model', 'LensModel', 'Lens',
                   'FocalLength', 'FNumber', 'ExposureTime',
-                  'ISO', 'ISOSpeedRatings', 'DateTimeOriginal', 'CreateDate', 'ModifyDate'
+                  'ISO', 'ISOSpeedRatings', 'DateTimeOriginal', 'CreateDate', 'ModifyDate',
+                  'GPSLatitude', 'GPSLongitude', 'GPSLatitudeRef', 'GPSLongitudeRef'
                 ]
               }).catch(() => null),
               typeof window.exifr.gps === 'function'
@@ -1130,7 +1180,11 @@
             const iso = isoVal ? `ISO ${Array.isArray(isoVal) ? isoVal[0] : isoVal}` : '';
             const captureDate = formatExifDate(safeData.DateTimeOriginal || safeData.CreateDate || safeData.ModifyDate);
 
-            const gpsCoords = gpsData ? formatGpsCoords(gpsData.latitude, gpsData.longitude) : '';
+            const rawLatitude = gpsData?.latitude ?? safeData.GPSLatitude ?? safeData.latitude;
+            const rawLongitude = gpsData?.longitude ?? safeData.GPSLongitude ?? safeData.longitude;
+            const latitudeRef = gpsData?.latitudeRef ?? safeData.GPSLatitudeRef ?? safeData.latitudeRef;
+            const longitudeRef = gpsData?.longitudeRef ?? safeData.GPSLongitudeRef ?? safeData.longitudeRef;
+            const gpsCoords = formatGpsCoords(rawLatitude, rawLongitude, latitudeRef, longitudeRef);
 
             const hasAny = Boolean(camera || lensFocal || aperture || shutter || iso || gpsCoords);
             if (!hasAny) return null;
