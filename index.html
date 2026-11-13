@@ -1,0 +1,1990 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FramEX — Auto-EXIF Photo Frame Generator</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Inter, JetBrains Mono, Playfair Display -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&display=swap" rel="stylesheet" />
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- exifr Metadata Parser & heic2any Client-Side Decoder -->
+  <script src="https://cdn.jsdelivr.net/npm/exifr@7/dist/full.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+            serif: ['Playfair Display', 'Georgia', 'serif'],
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* Subtle architectural dot grid for the studio canvas stage (Light & Dark) */
+    .studio-grid-bg {
+      background-color: #F1F5F9;
+      background-image: radial-gradient(#CBD5E1 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+    .dark .studio-grid-bg {
+      background-color: #0E1015;
+      background-image: radial-gradient(#262B36 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+
+    /* Custom precision range sliders */
+    input[type="range"].studio-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 5px;
+      background: #CBD5E1;
+      border-radius: 999px;
+      outline: none;
+    }
+    .dark input[type="range"].studio-slider {
+      background: #262B36;
+    }
+    input[type="range"].studio-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #6366F1;
+      border: 2px solid #E0E7FF;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.45);
+      transition: transform 0.15s ease, background-color 0.15s ease;
+    }
+    input[type="range"].studio-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+      background: #818CF8;
+    }
+    input[type="range"].studio-slider::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #6366F1;
+      border: 2px solid #E0E7FF;
+      cursor: pointer;
+    }
+
+    /* Custom subtle scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F8FAFC;
+    }
+    .dark ::-webkit-scrollbar-track {
+      background: #0B0D10;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 999px;
+    }
+    .dark ::-webkit-scrollbar-thumb {
+      background: #262B36;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
+    }
+    .dark ::-webkit-scrollbar-thumb:hover {
+      background: #374151;
+    }
+
+    /* Enlarged Mobile & Desktop Canvas Presentation */
+    #previewCanvas {
+      max-width: 100%;
+      max-height: 41vh;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.75);
+      transition: opacity 0.2s ease;
+    }
+    @media (min-width: 640px) {
+      #previewCanvas {
+        max-height: 43vh;
+      }
+    }
+    @media (min-width: 1024px) {
+      #previewCanvas {
+        max-height: 100%;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 dark:bg-[#0B0D10] text-slate-900 dark:text-slate-100 font-sans antialiased selection:bg-indigo-500/30 selection:text-indigo-700 dark:selection:text-indigo-200 overflow-x-hidden transition-colors duration-200">
+
+  <!-- Hidden File Input (Supports JPG, PNG, WEBP, HEIC, HEIF) -->
+  <input
+    type="file"
+    id="photoFileInput"
+    accept="image/*,.heic,.heif"
+    class="hidden"
+  />
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none w-max max-w-[92vw]"></div>
+
+  <!-- Top Navigation Header -->
+  <header class="lg:sticky lg:top-0 z-30 h-16 bg-white/90 dark:bg-[#0B0D10]/90 backdrop-blur-md border-b border-slate-200 dark:border-[#262B36] px-4 lg:px-6 flex items-center justify-between gap-3 transition-colors duration-200">
+    <!-- Brand -->
+    <div class="flex items-center gap-3 min-w-0">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 shrink-0">
+        <i data-lucide="aperture" class="w-5 h-5 text-white"></i>
+      </div>
+      <div class="flex items-center gap-2 min-w-0">
+        <h1 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-white truncate">FramEX</h1>
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25 shrink-0" title="Photos are processed locally and never uploaded">
+            Browser-only
+        </span>
+      </div>
+    </div>
+
+    <!-- Header Quick Actions -->
+    <div class="flex items-center gap-2 shrink-0">
+      <!-- Dark / Light Mode Switcher -->
+      <button
+        id="btnThemeToggle"
+        type="button"
+        class="inline-flex items-center justify-center w-9 h-9 rounded-lg text-slate-600 dark:text-slate-300 bg-slate-100 hover:bg-slate-200 dark:bg-[#1A1E26] dark:hover:bg-[#222732] border border-slate-200 dark:border-[#262B36] transition cursor-pointer"
+        title="Switch Light / Dark Mode"
+        aria-label="Switch Light or Dark Mode"
+      >
+        <i id="iconSun" data-lucide="sun" class="w-4 h-4 text-amber-500"></i>
+        <i id="iconMoon" data-lucide="moon" class="w-4 h-4 text-indigo-500 hidden"></i>
+      </button>
+
+        <button
+        id="btnSampleHeader"
+        type="button"
+        class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 hover:bg-slate-200 dark:bg-[#1A1E26] dark:hover:bg-[#222732] text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-[#262B36] transition cursor-pointer"
+        title="Load procedural sample landscape with realistic EXIF"
+      >
+        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-500 dark:text-amber-400"></i>
+        <span class="hidden sm:inline">Try Sample</span>
+      </button>
+
+      <button
+        id="btnUploadHeader"
+        type="button"
+        class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/20 transition cursor-pointer"
+      >
+        <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+        <span>Upload Photo</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Workspace Layout -->
+  <main class="flex flex-col lg:flex-row lg:h-[calc(100vh-4rem)]">
+
+    <!-- Left / Center: Sticky Mobile (56vh) & Desktop Preview Canvas Stage -->
+    <section
+      id="dropZoneStage"
+      class="sticky top-0 lg:static z-20 h-[56vh] lg:h-auto lg:max-h-none flex-1 studio-grid-bg backdrop-blur-md border-b border-slate-200 dark:border-[#262B36] lg:border-b-0 flex flex-col justify-between p-2.5 sm:p-4 lg:p-8 overflow-hidden select-none transition-colors duration-200"
+    >
+      <!-- Top Status Telemetry Bar -->
+      <div class="relative z-10 flex flex-wrap items-center justify-between gap-1.5 mb-1.5">
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <!-- Detected Source Format Badge -->
+          <div id="formatBadge" class="hidden items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-[11px] font-mono font-semibold bg-indigo-500/15 border border-indigo-500/30 text-indigo-700 dark:text-indigo-300 backdrop-blur-sm">
+            <span id="formatText">JPEG</span>
+          </div>
+
+          <!-- EXIF Status Pill -->
+          <div id="exifStatusBadge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium bg-white/90 dark:bg-[#14171D]/90 border border-slate-200 dark:border-[#262B36] text-slate-700 dark:text-slate-300 backdrop-blur-sm shadow-sm">
+            <span class="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-500"></span>
+            <span>Waiting for photo</span>
+          </div>
+        </div>
+
+        <!-- Output Resolution Pill -->
+        <div id="resolutionBadge" class="hidden items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-[11px] font-mono bg-white/90 dark:bg-[#14171D]/90 border border-slate-200 dark:border-[#262B36] text-slate-700 dark:text-slate-300 backdrop-blur-sm shadow-sm">
+          <i data-lucide="maximize-2" class="w-3 h-3 text-indigo-500 dark:text-indigo-400"></i>
+          <span id="resolutionText">0 × 0 px</span>
+        </div>
+      </div>
+
+      <!-- Center Stage Container -->
+      <div class="relative flex-1 flex items-center justify-center min-h-0 w-full">
+
+        <!-- Initial Empty State Dropzone Card -->
+        <div
+          id="emptyDropCard"
+          class="w-full max-w-lg rounded-2xl bg-white/95 dark:bg-[#14171D]/95 border-2 border-dashed border-slate-300 dark:border-[#2E3545] hover:border-indigo-500/70 p-4 sm:p-8 text-center transition-all duration-200 shadow-xl dark:shadow-2xl"
+        >
+          <div class="w-10 h-10 sm:w-14 sm:h-14 mx-auto mb-2.5 sm:mb-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+            <i data-lucide="image-plus" class="w-5 h-5 sm:w-7 sm:h-7"></i>
+          </div>
+          <h2 class="text-sm sm:text-xl font-bold text-slate-900 dark:text-white mb-1 sm:mb-2">Drop your photograph here</h2>
+          <p class="hidden sm:block text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-sm mx-auto mb-5 leading-relaxed">
+            Extracts camera model, lens, focal length, aperture, shutter speed, ISO &amp; GPS coordinates locally inside your browser—including iPhone HEIC files.
+          </p>
+
+          <div class="flex flex-row items-center justify-center gap-2 sm:gap-3 mt-2 sm:mt-0">
+            <button
+              id="btnUploadEmpty"
+              type="button"
+              class="inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/25 transition cursor-pointer"
+            >
+              <i data-lucide="folder-open" class="w-4 h-4"></i>
+              <span>Select Photo</span>
+            </button>
+
+            <button
+              id="btnSampleEmpty"
+              type="button"
+              class="inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium bg-slate-100 hover:bg-slate-200 dark:bg-[#1E232D] dark:hover:bg-[#262C38] text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-[#2F3646] transition cursor-pointer"
+            >
+              <i data-lucide="sparkles" class="w-4 h-4 text-amber-500 dark:text-amber-400"></i>
+              <span>Try Sample</span>
+            </button>
+          </div>
+
+          <p class="mt-2.5 sm:mt-4 text-[10px] sm:text-[11px] font-mono text-slate-500">
+            Supports JPG, PNG, WEBP, HEIC, HEIF • Photos stay in your browser
+          </p>
+        </div>
+
+        <!-- Live High-Resolution Canvas Wrapper -->
+        <div id="canvasContainer" class="hidden w-full h-full items-center justify-center p-0.5 sm:p-1.5">
+          <canvas id="previewCanvas" class="rounded-sm"></canvas>
+        </div>
+
+        <!-- HEIC / HEIF Client-Side Decoding Spinner Overlay -->
+        <div
+          id="heicLoadingOverlay"
+          class="hidden absolute inset-0 z-30 rounded-2xl bg-white/90 dark:bg-[#0B0D10]/85 backdrop-blur-md border border-indigo-500/30 flex-col items-center justify-center text-center p-4"
+        >
+          <div class="w-10 h-10 rounded-full border-2 border-indigo-500/30 border-t-indigo-500 dark:border-t-indigo-400 animate-spin mb-3"></div>
+          <p class="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">Converting HEIC file &amp; reading EXIF...</p>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Processed locally in your browser</p>
+        </div>
+
+        <!-- Drag-Over Active Overlay -->
+        <div
+          id="dragOverlay"
+          class="hidden absolute inset-0 z-20 rounded-2xl bg-indigo-950/80 backdrop-blur-sm border-2 border-dashed border-indigo-400 flex-col items-center justify-center text-center p-6 pointer-events-none"
+        >
+          <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 border border-indigo-400/40 flex items-center justify-center text-indigo-300 mb-2 animate-bounce">
+            <i data-lucide="download-cloud" class="w-6 h-6"></i>
+          </div>
+          <p class="text-sm sm:text-lg font-bold text-white">Drop photo to frame immediately</p>
+          <p class="text-xs text-indigo-200 mt-1">JPG, PNG, WEBP, HEIC, or HEIF supported</p>
+        </div>
+      </div>
+
+      <!-- Bottom Quick Preset Strip -->
+      <div class="relative z-10 mt-1.5 flex items-center justify-center">
+        <div class="inline-flex items-center gap-1 p-1 rounded-xl bg-white/90 dark:bg-[#14171D]/90 border border-slate-200 dark:border-[#262B36] backdrop-blur-md overflow-x-auto max-w-full shadow-sm">
+          <button type="button" data-quick-preset="classic" class="quick-preset-btn px-2 py-1 rounded-lg text-[11px] sm:text-xs font-medium transition cursor-pointer whitespace-nowrap">Classic White</button>
+          <button type="button" data-quick-preset="darkroom" class="quick-preset-btn px-2 py-1 rounded-lg text-[11px] sm:text-xs font-medium transition cursor-pointer whitespace-nowrap">Darkroom Matte</button>
+          <button type="button" data-quick-preset="leica" class="quick-preset-btn px-2 py-1 rounded-lg text-[11px] sm:text-xs font-medium transition cursor-pointer whitespace-nowrap">Leica Minimal</button>
+          <button type="button" data-quick-preset="blur" class="quick-preset-btn px-2 py-1 rounded-lg text-[11px] sm:text-xs font-medium transition cursor-pointer whitespace-nowrap">Blur Backdrop</button>
+          <button type="button" data-quick-preset="retro" class="quick-preset-btn px-2 py-1 rounded-lg text-[11px] sm:text-xs font-medium transition cursor-pointer whitespace-nowrap">Retro Film</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right: Scrollable Inspector Panel -->
+    <aside class="w-full lg:w-[410px] xl:w-[440px] bg-white dark:bg-[#14171D] lg:border-l border-slate-200 dark:border-[#262B36] flex flex-col lg:h-full shrink-0 transition-colors duration-200">
+
+      <!-- Inspector Section Filter Tabs -->
+      <div class="sticky top-[56vh] lg:top-0 z-10 bg-white/95 dark:bg-[#14171D]/95 backdrop-blur-md border-b border-slate-200 dark:border-[#262B36] px-4 py-2.5 flex items-center gap-1 overflow-x-auto">
+        <button type="button" data-tab="all" class="inspector-tab active px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition cursor-pointer">All</button>
+        <button type="button" data-tab="presets" class="inspector-tab px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1E232D] transition cursor-pointer">Presets</button>
+        <button type="button" data-tab="exif" class="inspector-tab px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1E232D] transition cursor-pointer">EXIF Data</button>
+        <button type="button" data-tab="style" class="inspector-tab px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1E232D] transition cursor-pointer">Frame Style</button>
+        <button type="button" data-tab="export" class="inspector-tab px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1E232D] transition cursor-pointer">Export</button>
+      </div>
+
+      <!-- Scrollable Controls Body -->
+      <div class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-5">
+
+        <!-- 1. FRAME STYLE PRESETS & ASPECT RATIO -->
+        <div data-section="presets" class="inspector-section rounded-xl bg-slate-50/90 dark:bg-[#1A1E26] border border-slate-200 dark:border-[#262B36] overflow-hidden">
+          <button type="button" class="accordion-trigger w-full px-4 py-3 flex items-center justify-between text-left hover:bg-slate-100 dark:hover:bg-[#202530] transition cursor-pointer">
+            <div class="flex items-center gap-2">
+              <i data-lucide="layout-template" class="w-4 h-4 text-indigo-500 dark:text-indigo-400"></i>
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">Frame Presets &amp; Ratio</span>
+            </div>
+            <i data-lucide="chevron-down" class="accordion-chevron w-4 h-4 text-slate-500 dark:text-slate-400 transition-transform duration-200"></i>
+          </button>
+
+          <div class="accordion-content px-4 pb-4 pt-1 space-y-3">
+            <!-- Output Aspect Ratio Selector -->
+            <div>
+              <label class="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1.5">Output Aspect Ratio</label>
+              <div class="grid grid-cols-4 gap-1.5">
+                <button type="button" data-ratio="auto" class="ratio-btn py-1.5 px-2 rounded-lg border text-xs font-mono font-medium transition cursor-pointer">Auto</button>
+                <button type="button" data-ratio="4:5" class="ratio-btn py-1.5 px-2 rounded-lg border text-xs font-mono font-medium transition cursor-pointer">4:5</button>
+                <button type="button" data-ratio="1:1" class="ratio-btn py-1.5 px-2 rounded-lg border text-xs font-mono font-medium transition cursor-pointer">1:1</button>
+                <button type="button" data-ratio="16:9" class="ratio-btn py-1.5 px-2 rounded-lg border text-xs font-mono font-medium transition cursor-pointer">16:9</button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-2">
+              <!-- Classic White -->
+              <button type="button" data-preset="classic" class="preset-card group flex items-center justify-between p-2.5 rounded-xl border text-left transition cursor-pointer">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-lg bg-white border border-slate-300 flex flex-col justify-between p-1 shrink-0">
+                    <div class="w-full h-5 bg-slate-800 rounded-[2px]"></div>
+                    <div class="flex justify-between items-center px-0.5">
+                      <span class="w-3 h-0.5 bg-slate-900"></span>
+                      <span class="w-2 h-0.5 bg-slate-400"></span>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="text-xs font-semibold text-slate-900 dark:text-white">Classic White</div>
+                    <div class="text-[11px] text-slate-500 dark:text-slate-400">Crisp gallery white frame with clean divider</div>
+                  </div>
+                </div>
+                <span class="preset-check w-4 h-4 rounded-full border border-slate-400 dark:border-slate-600 flex items-center justify-center shrink-0"></span>
+              </button>
+
+              <!-- Darkroom Matte -->
+              <button type="button" data-preset="darkroom" class="preset-card group flex items-center justify-between p-2.5 rounded-xl border text-left transition cursor-pointer">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-lg bg-[#111113] border border-neutral-700 flex flex-col justify-between p-1 shrink-0">
+                    <div class="w-full h-5 bg-neutral-700 rounded-[2px]"></div>
+                    <div class="flex justify-between items-center px-0.5">
+                      <span class="w-3 h-0.5 bg-white"></span>
+                      <span class="w-2 h-0.5 bg-amber-400"></span>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="text-xs font-semibold text-slate-900 dark:text-white">Darkroom Matte</div>
+                    <div class="text-[11px] text-slate-500 dark:text-slate-400">Deep #111113 charcoal border &amp; light typography</div>
+                  </div>
+                </div>
+                <span class="preset-check w-4 h-4 rounded-full border border-slate-400 dark:border-slate-600 flex items-center justify-center shrink-0"></span>
+              </button>
+
+              <!-- Leica Minimal -->
+              <button type="button" data-preset="leica" class="preset-card group flex items-center justify-between p-2.5 rounded-xl border text-left transition cursor-pointer">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-lg bg-[#FAFAFA] border border-slate-300 flex flex-col justify-between p-1 shrink-0">
+                    <div class="w-full h-5 bg-zinc-800 rounded-[2px]"></div>
+                    <div class="flex items-center gap-1 px-0.5">
+                      <span class="w-1.5 h-1.5 rounded-full bg-red-600"></span>
+                      <span class="w-4 h-0.5 bg-zinc-800"></span>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="text-xs font-semibold text-slate-900 dark:text-white">Leica Minimal</div>
+                    <div class="text-[11px] text-slate-500 dark:text-slate-400">Signature red dot accent &amp; refined spacing</div>
+                  </div>
+                </div>
+                <span class="preset-check w-4 h-4 rounded-full border border-slate-400 dark:border-slate-600 flex items-center justify-center shrink-0"></span>
+              </button>
+
+              <!-- Blur Backdrop -->
+              <button type="button" data-preset="blur" class="preset-card group flex items-center justify-between p-2.5 rounded-xl border text-left transition cursor-pointer">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-900 via-slate-800 to-amber-900 border border-slate-600 flex flex-col justify-between p-1.5 shrink-0">
+                    <div class="w-full h-4 bg-slate-200/90 rounded-[2px] shadow"></div>
+                    <div class="w-5 h-0.5 bg-white/80 mx-auto"></div>
+                  </div>
+                  <div>
+                    <div class="text-xs font-semibold text-slate-900 dark:text-white">Blur Backdrop</div>
+                    <div class="text-[11px] text-slate-500 dark:text-slate-400">Gaussian-blurred zoomed photo card &amp; shadow</div>
+                  </div>
+                </div>
+                <span class="preset-check w-4 h-4 rounded-full border border-slate-400 dark:border-slate-600 flex items-center justify-center shrink-0"></span>
+              </button>
+
+              <!-- Retro Film -->
+              <button type="button" data-preset="retro" class="preset-card group flex items-center justify-between p-2.5 rounded-xl border text-left transition cursor-pointer">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-lg bg-[#F6F3EB] border border-stone-300 flex flex-col justify-between p-1 pb-1.5 shrink-0">
+                    <div class="w-full h-4 bg-stone-700 rounded-[1px]"></div>
+                    <div class="w-4 h-0.5 bg-stone-600 mx-auto"></div>
+                  </div>
+                  <div>
+                    <div class="text-xs font-semibold text-slate-900 dark:text-white">Retro Film</div>
+                    <div class="text-[11px] text-slate-500 dark:text-slate-400">Warm #F6F3EB paper &amp; Polaroid monospace stamp</div>
+                  </div>
+                </div>
+                <span class="preset-check w-4 h-4 rounded-full border border-slate-400 dark:border-slate-600 flex items-center justify-center shrink-0"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. EDITABLE EXIF METADATA -->
+        <div data-section="exif" class="inspector-section rounded-xl bg-slate-50/90 dark:bg-[#1A1E26] border border-slate-200 dark:border-[#262B36] overflow-hidden">
+          <div class="px-4 py-3 flex items-center justify-between hover:bg-slate-100 dark:hover:bg-[#202530] transition">
+            <button type="button" class="accordion-trigger flex-1 flex items-center gap-2 text-left cursor-pointer">
+              <i data-lucide="camera" class="w-4 h-4 text-amber-500 dark:text-amber-400"></i>
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">EXIF Metadata</span>
+            </button>
+            <div class="flex items-center gap-2">
+                <button
+                id="btnResetMetadata"
+                type="button"
+                disabled
+                class="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-[#12151C] hover:bg-slate-100 dark:hover:bg-[#262C38] border border-slate-200 dark:border-[#262B36] transition cursor-pointer disabled:opacity-40 disabled:pointer-events-none"
+                title="Restore original detected EXIF metadata"
+              >
+                <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                <span>Reset</span>
+              </button>
+              <button type="button" class="accordion-trigger p-1 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer" aria-label="Toggle EXIF Metadata">
+                <i data-lucide="chevron-down" class="accordion-chevron w-4 h-4 transition-transform duration-200"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="accordion-content px-4 pb-4 pt-1 space-y-3">
+            <!-- Camera Model -->
+            <div>
+              <label for="inputCamera" class="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">Camera Model</label>
+              <input
+                id="inputCamera"
+                type="text"
+                placeholder="FUJIFILM X100VI"
+                class="w-full px-3 py-2 rounded-lg bg-white dark:bg-[#0F1217] border border-slate-200 dark:border-[#262B36] focus:border-indigo-500 focus:outline-none text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 transition"
+              />
+            </div>
+
+            <!-- Lens / Focal Length -->
+            <div>
+              <label for="inputLensFocal" class="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">Lens / Focal Length</label>
+              <input
+                id="inputLensFocal"
+                type="text"
+                placeholder="23mm f/2.0"
+                class="w-full px-3 py-2 rounded-lg bg-white dark:bg-[#0F1217] border border-slate-200 dark:border-[#262B36] focus:border-indigo-500 focus:outline-none text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 transition"
+              />
+            </div>
+
+            <!-- Exposure Triangle Grid -->
+            <div class="grid grid-cols-3 gap-2">
+              <div>
+                <label for="inputAperture" class="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">Aperture</label>
+                <input
+                  id="inputAperture"
+                  type="text"
+                  placeholder="f/2.0"
+                  class="w-full px-2.5 py-2 rounded-lg bg-white dark:bg-[#0F1217] border border-slate-200 dark:border-[#262B36] focus:border-indigo-500 focus:outline-none text-xs font-mono text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 transition"
+                />
+              </div>
+              <div>
+                <label for="inputShutter" class="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">Shutter</label>
+                <input
+                  id="inputShutter"
+                  type="text"
+                  placeholder="1/1000s"
+                  class="w-full px-2.5 py-2 rounded-lg bg-white dark:bg-[#0F1217] border border-slate-200 dark:border-[#262B36] focus:border-indigo-500 focus:outline-none text-xs font-mono text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 transition"
+                />
+              </div>
+              <div>
+                <label for="inputIso" class="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">ISO</label>
+                <input
+                  id="inputIso"
+                  type="text"
+                  placeholder="ISO 160"
+                  class="w-full px-2.5 py-2 rounded-lg bg-white dark:bg-[#0F1217] border border-slate-200 dark:border-[#262B36] focus:border-indigo-500 focus:outline-none text-xs font-mono text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 transition"
+                />
+              </div>
+            </div>
+
+            <!-- Capture Date & Location / Caption -->
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label for="inputCaptureDate" class="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">Capture Date</label>
+                <input
+                  id="inputCaptureDate"
+                  type="text"
+                  placeholder="2026.11.13"
+                  class="w-full px-2.5 py-2 rounded-lg bg-white dark:bg-[#0F1217] border border-slate-200 dark:border-[#262B36] focus:border-indigo-500 focus:outline-none text-xs font-mono text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 transition"
+                />
+              </div>
+              <div>
+                <div class="flex items-center justify-between gap-1 mb-1">
+                  <label for="inputLocation" class="block text-[11px] font-medium text-slate-600 dark:text-slate-400 truncate">Location / Note</label>
+                  <span id="gpsHint" class="text-[10px] font-mono text-slate-500 shrink-0">GPS / Custom</span>
+                </div>
+                <input
+                  id="inputLocation"
+                  type="text"
+                  placeholder="EXIF GPS or custom note"
+                  class="w-full px-2.5 py-2 rounded-lg bg-white dark:bg-[#0F1217] border border-slate-200 dark:border-[#262B36] focus:border-indigo-500 focus:outline-none text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 transition"
+                />
+                <p class="mt-1 text-[10px] leading-relaxed text-amber-700 dark:text-amber-300/80">GPS may reveal your exact location. Clear this field before sharing if needed.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. FRAME STYLE & TYPOGRAPHY CUSTOMIZATION -->
+        <div data-section="style" class="inspector-section rounded-xl bg-slate-50/90 dark:bg-[#1A1E26] border border-slate-200 dark:border-[#262B36] overflow-hidden">
+          <div class="px-4 py-3 flex items-center justify-between hover:bg-slate-100 dark:hover:bg-[#202530] transition">
+            <button type="button" class="accordion-trigger flex-1 flex items-center gap-2 text-left cursor-pointer">
+              <i data-lucide="sliders-horizontal" class="w-4 h-4 text-indigo-500 dark:text-indigo-400"></i>
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">Frame &amp; Typography</span>
+            </button>
+            <div class="flex items-center gap-2">
+                <button
+                id="btnResetStyle"
+                type="button"
+                disabled
+                class="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-[#12151C] hover:bg-slate-100 dark:hover:bg-[#262C38] border border-slate-200 dark:border-[#262B36] transition cursor-pointer disabled:opacity-40 disabled:pointer-events-none"
+                title="Reset frame preset, sliders, and toggles to default"
+              >
+                <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                <span>Reset</span>
+              </button>
+              <button type="button" class="accordion-trigger p-1 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer" aria-label="Toggle Frame & Typography">
+                <i data-lucide="chevron-down" class="accordion-chevron w-4 h-4 transition-transform duration-200"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="accordion-content px-4 pb-4 pt-1 space-y-4">
+            <!-- Font Family Selector -->
+            <div>
+              <label class="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1.5">Typography Style</label>
+              <div class="grid grid-cols-3 gap-1.5">
+                <button type="button" data-font="Inter" class="font-btn py-2 px-2 rounded-lg border text-xs font-sans font-medium transition cursor-pointer">
+                  Clean Sans
+                </button>
+                <button type="button" data-font="JetBrains Mono" class="font-btn py-2 px-2 rounded-lg border text-xs font-mono font-medium transition cursor-pointer">
+                  Tech Mono
+                </button>
+                <button type="button" data-font="Playfair Display" class="font-btn py-2 px-2 rounded-lg border text-xs font-serif font-medium transition cursor-pointer">
+                  Editorial
+                </button>
+              </div>
+            </div>
+
+            <!-- Sliders -->
+            <div class="space-y-3 pt-1">
+              <!-- Border Padding -->
+              <div>
+                <div class="flex justify-between items-center mb-1">
+                  <label for="sliderPadding" class="text-[11px] font-medium text-slate-600 dark:text-slate-400">Border Padding</label>
+                  <span id="valPadding" class="text-[11px] font-mono text-indigo-600 dark:text-indigo-400">1.05×</span>
+                </div>
+                <input id="sliderPadding" type="range" min="0.5" max="2.0" step="0.05" value="1.05" class="studio-slider" />
+              </div>
+
+              <!-- Photo Corner Radius -->
+              <div>
+                <div class="flex justify-between items-center mb-1">
+                  <label for="sliderRadius" class="text-[11px] font-medium text-slate-600 dark:text-slate-400">Photo Corner Radius</label>
+                  <span id="valRadius" class="text-[11px] font-mono text-indigo-600 dark:text-indigo-400">0 px</span>
+                </div>
+                <input id="sliderRadius" type="range" min="0" max="28" step="1" value="0" class="studio-slider" />
+              </div>
+
+              <!-- Font Scale -->
+              <div>
+                <div class="flex justify-between items-center mb-1">
+                  <label for="sliderFontScale" class="text-[11px] font-medium text-slate-600 dark:text-slate-400">Font Scale</label>
+                  <span id="valFontScale" class="text-[11px] font-mono text-indigo-600 dark:text-indigo-400">0.95×</span>
+                </div>
+                <input id="sliderFontScale" type="range" min="0.75" max="1.4" step="0.05" value="0.95" class="studio-slider" />
+              </div>
+            </div>
+
+            <!-- Visibility Toggle Switches -->
+            <div class="pt-3 border-t border-slate-200 dark:border-[#262B36] grid grid-cols-2 gap-2.5">
+              <label class="flex items-center justify-between p-2.5 rounded-lg bg-white dark:bg-[#0F1217] border border-slate-200 dark:border-[#262B36] cursor-pointer hover:border-slate-400 dark:hover:border-slate-600 transition">
+                <span class="text-xs text-slate-700 dark:text-slate-300">Show Date</span>
+                <input id="toggleShowDate" type="checkbox" checked class="accent-indigo-500 w-4 h-4 rounded cursor-pointer" />
+              </label>
+
+              <label class="flex items-center justify-between p-2.5 rounded-lg bg-white dark:bg-[#0F1217] border border-slate-200 dark:border-[#262B36] cursor-pointer hover:border-slate-400 dark:hover:border-slate-600 transition">
+                <span class="text-xs text-slate-700 dark:text-slate-300">Location / Note</span>
+                <input id="toggleLocation" type="checkbox" checked class="accent-indigo-500 w-4 h-4 rounded cursor-pointer" />
+              </label>
+
+              <label class="flex items-center justify-between p-2.5 rounded-lg bg-white dark:bg-[#0F1217] border border-slate-200 dark:border-[#262B36] cursor-pointer hover:border-slate-400 dark:hover:border-slate-600 transition">
+                <span class="text-xs text-slate-700 dark:text-slate-300">Accent Dot</span>
+                <input id="toggleAccentDot" type="checkbox" checked class="accent-indigo-500 w-4 h-4 rounded cursor-pointer" />
+              </label>
+
+              <label class="flex items-center justify-between p-2.5 rounded-lg bg-white dark:bg-[#0F1217] border border-slate-200 dark:border-[#262B36] cursor-pointer hover:border-slate-400 dark:hover:border-slate-600 transition">
+                <span class="text-xs text-slate-700 dark:text-slate-300">Drop Shadow</span>
+                <input id="toggleDropShadow" type="checkbox" class="accent-indigo-500 w-4 h-4 rounded cursor-pointer" />
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. HIGH-RESOLUTION EXPORT & SHARE -->
+        <div data-section="export" class="inspector-section rounded-xl bg-slate-50/90 dark:bg-[#1A1E26] border border-slate-200 dark:border-[#262B36] overflow-hidden">
+          <button type="button" class="accordion-trigger w-full px-4 py-3 flex items-center justify-between text-left hover:bg-slate-100 dark:hover:bg-[#202530] transition cursor-pointer">
+            <div class="flex items-center gap-2">
+              <i data-lucide="download" class="w-4 h-4 text-emerald-500 dark:text-emerald-400"></i>
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">Export &amp; Share</span>
+            </div>
+            <i data-lucide="chevron-down" class="accordion-chevron w-4 h-4 text-slate-500 dark:text-slate-400 transition-transform duration-200"></i>
+          </button>
+
+          <div class="accordion-content px-4 pb-4 pt-1 space-y-2.5">
+            <p class="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+              Exports high-resolution output (up to 3600px on the long edge) with proportionally scaled borders and typography.
+            </p>
+
+            <button
+              id="btnDownloadJpg"
+              type="button"
+              disabled
+              class="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:pointer-events-none text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20 transition cursor-pointer"
+            >
+              <i data-lucide="download" class="w-4 h-4"></i>
+              <span>Download JPG (95% Quality)</span>
+            </button>
+
+            <button
+              id="btnDownloadPng"
+              type="button"
+              disabled
+              class="w-full py-2.5 px-4 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-[#222732] dark:hover:bg-[#2B3140] disabled:opacity-40 disabled:pointer-events-none text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-[#323949] text-xs font-semibold flex items-center justify-center gap-2 transition cursor-pointer"
+            >
+              <i data-lucide="file-image" class="w-4 h-4 text-amber-500 dark:text-amber-400"></i>
+              <span>Download PNG (Lossless)</span>
+            </button>
+
+            <!-- Web Share API Button (Shown automatically on supported browsers) -->
+            <button
+              id="btnShareImage"
+              type="button"
+              disabled
+              class="hidden w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:pointer-events-none text-white text-xs font-semibold items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 transition cursor-pointer"
+            >
+              <i data-lucide="share-2" class="w-4 h-4"></i>
+              <span>Share Image</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    /**
+     * FramEX — 100% Client-Side HEIC + EXIF Photo Frame Renderer
+     */
+    (function () {
+      function bootStudio() {
+        // Safely initialize Lucide icons
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+          window.lucide.createIcons();
+        }
+
+        const DEFAULT_METADATA = {
+          camera: 'FUJIFILM X100VI',
+          lensFocal: '23mm f/2.0',
+          aperture: 'f/2.0',
+          shutter: '1/1000s',
+          iso: 'ISO 160',
+          captureDate: '2026.11.13',
+          location: 'Mount Prau, Central Java'
+        };
+
+        const DEFAULT_STYLE = {
+          fontFamily: 'Inter',
+          padding: 1.05,
+          cornerRadius: 0,
+          fontScale: 0.95,
+          showDate: true,
+          showLocation: true,
+          showAccentDot: true,
+          dropShadow: false
+        };
+
+        // Application State
+        const state = {
+          image: null,
+          fileName: 'photo-exif',
+          preset: 'classic', // 'classic' | 'darkroom' | 'leica' | 'blur' | 'retro'
+          aspectRatio: 'auto', // 'auto' | '4:5' | '1:1' | '16:9'
+          sourceFormat: '',
+          exifStatus: 'idle', // 'idle' | 'detected' | 'missing' | 'sample'
+          hasGpsTag: false,
+          metadata: { ...DEFAULT_METADATA },
+          originalMetadata: { ...DEFAULT_METADATA },
+          style: { ...DEFAULT_STYLE }
+        };
+
+        // Frame Preset Visual Definitions
+        const PRESETS = {
+          classic: {
+            bg: '#FFFFFF',
+            textPrimary: '#0F172A',
+            textSecondary: '#64748B',
+            divider: '#E2E8F0',
+            accent: '#E11D48',
+            footerScale: 1.0
+          },
+          darkroom: {
+            bg: '#111113',
+            textPrimary: '#F8FAFC',
+            textSecondary: '#94A3B8',
+            divider: '#27272A',
+            accent: '#F59E0B',
+            footerScale: 1.0
+          },
+          leica: {
+            bg: '#FAFAFA',
+            textPrimary: '#18181B',
+            textSecondary: '#71717A',
+            divider: '#E4E4E7',
+            accent: '#DC2626',
+            footerScale: 1.05
+          },
+          blur: {
+            bg: '#0F172A',
+            textPrimary: '#FFFFFF',
+            textSecondary: 'rgba(255, 255, 255, 0.78)',
+            divider: 'rgba(255, 255, 255, 0.22)',
+            accent: '#38BDF8',
+            footerScale: 1.05
+          },
+          retro: {
+            bg: '#F6F3EB',
+            textPrimary: '#292524',
+            textSecondary: '#78716C',
+            divider: '#D6D3D1',
+            accent: '#D97706',
+            footerScale: 1.25
+          }
+        };
+
+        // Cache DOM References
+        const el = {
+          fileInput: document.getElementById('photoFileInput'),
+          dropZoneStage: document.getElementById('dropZoneStage'),
+          emptyDropCard: document.getElementById('emptyDropCard'),
+          canvasContainer: document.getElementById('canvasContainer'),
+          previewCanvas: document.getElementById('previewCanvas'),
+          dragOverlay: document.getElementById('dragOverlay'),
+          heicLoadingOverlay: document.getElementById('heicLoadingOverlay'),
+          formatBadge: document.getElementById('formatBadge'),
+          formatText: document.getElementById('formatText'),
+          exifStatusBadge: document.getElementById('exifStatusBadge'),
+          resolutionBadge: document.getElementById('resolutionBadge'),
+          resolutionText: document.getElementById('resolutionText'),
+          toastContainer: document.getElementById('toastContainer'),
+
+          // Action buttons
+          btnThemeToggle: document.getElementById('btnThemeToggle'),
+          iconSun: document.getElementById('iconSun'),
+          iconMoon: document.getElementById('iconMoon'),
+          btnUploadHeader: document.getElementById('btnUploadHeader'),
+          btnUploadEmpty: document.getElementById('btnUploadEmpty'),
+          btnSampleHeader: document.getElementById('btnSampleHeader'),
+          btnSampleEmpty: document.getElementById('btnSampleEmpty'),
+          btnDownloadJpg: document.getElementById('btnDownloadJpg'),
+          btnDownloadPng: document.getElementById('btnDownloadPng'),
+          btnShareImage: document.getElementById('btnShareImage'),
+          btnResetMetadata: document.getElementById('btnResetMetadata'),
+          btnResetStyle: document.getElementById('btnResetStyle'),
+
+          // Metadata inputs
+          inputCamera: document.getElementById('inputCamera'),
+          inputLensFocal: document.getElementById('inputLensFocal'),
+          inputAperture: document.getElementById('inputAperture'),
+          inputShutter: document.getElementById('inputShutter'),
+          inputIso: document.getElementById('inputIso'),
+          inputCaptureDate: document.getElementById('inputCaptureDate'),
+          inputLocation: document.getElementById('inputLocation'),
+          gpsHint: document.getElementById('gpsHint'),
+
+          // Style inputs
+          sliderPadding: document.getElementById('sliderPadding'),
+          sliderRadius: document.getElementById('sliderRadius'),
+          sliderFontScale: document.getElementById('sliderFontScale'),
+          valPadding: document.getElementById('valPadding'),
+          valRadius: document.getElementById('valRadius'),
+          valFontScale: document.getElementById('valFontScale'),
+          toggleShowDate: document.getElementById('toggleShowDate'),
+          toggleLocation: document.getElementById('toggleLocation'),
+          toggleAccentDot: document.getElementById('toggleAccentDot'),
+          toggleDropShadow: document.getElementById('toggleDropShadow')
+        };
+
+        let renderRafId = null;
+        let cachedBlurCanvas = null;
+        let cachedBlurKey = '';
+
+        // Reveal Share button if Web Share API supports sharing files
+        if (typeof navigator !== 'undefined' && typeof navigator.share === 'function' && typeof navigator.canShare === 'function') {
+          el.btnShareImage.classList.remove('hidden');
+          el.btnShareImage.classList.add('flex');
+        }
+
+        /**
+         * Apply Dark / Light Theme to <html> and update toggle icon
+         */
+        function applyTheme(mode) {
+          const isDark = mode === 'dark';
+          document.documentElement.classList.toggle('dark', isDark);
+          if (el.iconSun && el.iconMoon) {
+            el.iconSun.classList.toggle('hidden', !isDark);
+            el.iconMoon.classList.toggle('hidden', isDark);
+          }
+          try {
+            localStorage.setItem('framex-theme', mode);
+          } catch (_) {
+            // Ignore storage errors in restricted contexts
+          }
+        }
+
+        function initTheme() {
+          let savedTheme = 'dark';
+          try {
+            const stored = localStorage.getItem('framex-theme');
+            if (stored === 'light' || stored === 'dark') {
+              savedTheme = stored;
+            }
+          } catch (_) {
+            // Default to dark
+          }
+          applyTheme(savedTheme);
+        }
+
+        /**
+         * Display a non-blocking toast message
+         */
+        function showToast(message, type = 'info') {
+          const palette = {
+            info: 'bg-white/95 dark:bg-[#1A1E26] border-slate-200 dark:border-[#2E3646] text-slate-900 dark:text-slate-100',
+            success: 'bg-emerald-950/95 border-emerald-500/40 text-emerald-200',
+            warning: 'bg-amber-950/95 border-amber-500/40 text-amber-200',
+            error: 'bg-rose-950/95 border-rose-500/40 text-rose-200'
+          };
+          const toast = document.createElement('div');
+          toast.className = `px-4 py-2.5 rounded-xl border text-xs font-medium shadow-2xl backdrop-blur-md transition-all duration-300 opacity-0 translate-y-2 ${palette[type] || palette.info}`;
+          toast.textContent = message;
+          el.toastContainer.appendChild(toast);
+
+          requestAnimationFrame(() => {
+            toast.classList.remove('opacity-0', 'translate-y-2');
+          });
+
+          setTimeout(() => {
+            toast.classList.add('opacity-0', 'translate-y-2');
+            setTimeout(() => toast.remove(), 300);
+          }, 3400);
+        }
+
+        /**
+         * Update EXIF status badge pill
+         */
+        function updateExifBadge() {
+          const map = {
+            idle: {
+              dot: 'bg-slate-500',
+              text: 'Waiting for photo'
+            },
+            detected: {
+              dot: 'bg-emerald-400 animate-pulse',
+              text: 'EXIF Auto-Detected'
+            },
+            missing: {
+              dot: 'bg-amber-400',
+              text: 'No EXIF • Manual Edit'
+            },
+            sample: {
+              dot: 'bg-indigo-400',
+              text: 'Sample EXIF Loaded'
+            }
+          };
+          const current = map[state.exifStatus] || map.idle;
+          el.exifStatusBadge.innerHTML = `<span class="w-2 h-2 rounded-full ${current.dot}"></span><span>${current.text}</span>`;
+
+          // Update GPS hint label
+          if (state.exifStatus === 'idle') {
+            el.gpsHint.textContent = 'GPS / Custom';
+            el.gpsHint.className = 'text-[10px] font-mono text-slate-500 shrink-0';
+          } else if (state.hasGpsTag) {
+            el.gpsHint.textContent = 'GPS EXIF found';
+            el.gpsHint.className = 'text-[10px] font-mono text-emerald-400 shrink-0';
+          } else {
+            el.gpsHint.textContent = 'Manual note';
+            el.gpsHint.className = 'text-[10px] font-mono text-slate-500 shrink-0';
+          }
+        }
+
+        /**
+         * Update source format badge pill
+         */
+        function updateFormatBadge() {
+          if (!state.sourceFormat) {
+            el.formatBadge.classList.add('hidden');
+            el.formatBadge.classList.remove('inline-flex');
+            return;
+          }
+          el.formatText.textContent = state.sourceFormat;
+          el.formatBadge.classList.remove('hidden');
+          el.formatBadge.classList.add('inline-flex');
+        }
+
+        /**
+         * Sync JS state to form inputs and active button styles
+         */
+        function syncInputsFromState() {
+          el.inputCamera.value = state.metadata.camera;
+          el.inputLensFocal.value = state.metadata.lensFocal;
+          el.inputAperture.value = state.metadata.aperture;
+          el.inputShutter.value = state.metadata.shutter;
+          el.inputIso.value = state.metadata.iso;
+          el.inputCaptureDate.value = state.metadata.captureDate;
+          el.inputLocation.value = state.metadata.location;
+
+          el.sliderPadding.value = state.style.padding;
+          el.valPadding.textContent = `${Number(state.style.padding).toFixed(2)}×`;
+
+          el.sliderRadius.value = state.style.cornerRadius;
+          el.valRadius.textContent = `${state.style.cornerRadius} px`;
+
+          el.sliderFontScale.value = state.style.fontScale;
+          el.valFontScale.textContent = `${Number(state.style.fontScale).toFixed(2)}×`;
+
+          el.toggleShowDate.checked = state.style.showDate;
+          el.toggleLocation.checked = state.style.showLocation;
+          el.toggleAccentDot.checked = state.style.showAccentDot;
+          el.toggleDropShadow.checked = state.style.dropShadow;
+
+          // Update Preset Cards
+          document.querySelectorAll('.preset-card').forEach(card => {
+            const active = card.dataset.preset === state.preset;
+            card.classList.toggle('border-indigo-500', active);
+            card.classList.toggle('bg-indigo-500/10', active);
+            card.classList.toggle('border-slate-200', !active);
+            card.classList.toggle('dark:border-[#262B36]', !active);
+            card.classList.toggle('bg-white', !active);
+            card.classList.toggle('dark:bg-[#12151C]', !active);
+
+            const check = card.querySelector('.preset-check');
+            if (check) {
+              check.classList.toggle('border-indigo-400', active);
+              check.classList.toggle('bg-indigo-500', active);
+              check.innerHTML = active ? '<span class="w-1.5 h-1.5 rounded-full bg-white"></span>' : '';
+            }
+          });
+
+          // Update Quick Preset Pills
+          document.querySelectorAll('.quick-preset-btn').forEach(btn => {
+            const active = btn.dataset.quickPreset === state.preset;
+            btn.classList.toggle('bg-indigo-600', active);
+            btn.classList.toggle('text-white', active);
+            btn.classList.toggle('text-slate-600', !active);
+            btn.classList.toggle('dark:text-slate-400', !active);
+            btn.classList.toggle('hover:text-slate-900', !active);
+            btn.classList.toggle('dark:hover:text-white', !active);
+          });
+
+          // Update Aspect Ratio Buttons
+          document.querySelectorAll('.ratio-btn').forEach(btn => {
+            const active = btn.dataset.ratio === state.aspectRatio;
+            btn.classList.toggle('border-indigo-500', active);
+            btn.classList.toggle('bg-indigo-500/15', active);
+            btn.classList.toggle('text-indigo-700', active);
+            btn.classList.toggle('dark:text-white', active);
+            btn.classList.toggle('border-slate-200', !active);
+            btn.classList.toggle('dark:border-[#262B36]', !active);
+            btn.classList.toggle('bg-white', !active);
+            btn.classList.toggle('dark:bg-[#0F1217]', !active);
+            btn.classList.toggle('text-slate-600', !active);
+            btn.classList.toggle('dark:text-slate-400', !active);
+          });
+
+          // Update Font Buttons
+          document.querySelectorAll('.font-btn').forEach(btn => {
+            const active = btn.dataset.font === state.style.fontFamily;
+            btn.classList.toggle('border-indigo-500', active);
+            btn.classList.toggle('bg-indigo-500/15', active);
+            btn.classList.toggle('text-indigo-700', active);
+            btn.classList.toggle('dark:text-white', active);
+            btn.classList.toggle('border-slate-200', !active);
+            btn.classList.toggle('dark:border-[#262B36]', !active);
+            btn.classList.toggle('bg-white', !active);
+            btn.classList.toggle('dark:bg-[#0F1217]', !active);
+            btn.classList.toggle('text-slate-600', !active);
+            btn.classList.toggle('dark:text-slate-400', !active);
+          });
+        }
+
+        /**
+         * Keep reset actions unavailable until a photo has been loaded.
+         */
+        function updateResetAvailability() {
+          const hasImage = Boolean(state.image);
+          el.btnResetMetadata.disabled = !hasImage;
+          el.btnResetStyle.disabled = !hasImage;
+        }
+
+        /**
+         * Format exposure time in seconds to human-readable fraction
+         */
+        function formatShutterSpeed(exposureTime) {
+          if (!exposureTime || typeof exposureTime !== 'number' || exposureTime <= 0) return '';
+          if (exposureTime >= 1) {
+            return `${Number(exposureTime.toFixed(1))}s`;
+          }
+          const denominator = Math.round(1 / exposureTime);
+          return `1/${denominator}s`;
+        }
+
+        /**
+         * Format EXIF date to YYYY.MM.DD
+         */
+        function formatExifDate(dateInput) {
+          if (!dateInput) return '';
+          if (dateInput instanceof Date && !isNaN(dateInput.getTime())) {
+            const y = dateInput.getFullYear();
+            const m = String(dateInput.getMonth() + 1).padStart(2, '0');
+            const d = String(dateInput.getDate()).padStart(2, '0');
+            return `${y}.${m}.${d}`;
+          }
+          const str = String(dateInput).trim();
+          const match = str.match(/^(\d{4})[:\-](\d{2})[:\-](\d{2})/);
+          if (match) {
+            return `${match[1]}.${match[2]}.${match[3]}`;
+          }
+          return str;
+        }
+
+        /**
+         * Format decimal GPS latitude & longitude into readable EXIF coordinates
+         */
+        function formatGpsCoords(lat, lon) {
+          if (typeof lat !== 'number' || typeof lon !== 'number' || isNaN(lat) || isNaN(lon)) {
+            return '';
+          }
+          const latDir = lat >= 0 ? 'N' : 'S';
+          const lonDir = lon >= 0 ? 'E' : 'W';
+          return `${Math.abs(lat).toFixed(4)}° ${latDir}, ${Math.abs(lon).toFixed(4)}° ${lonDir}`;
+        }
+
+        /**
+         * Parse EXIF & GPS metadata directly from File/Blob using exifr
+         */
+        async function parseExifFromFile(file) {
+          try {
+            if (!window.exifr || typeof window.exifr.parse !== 'function') {
+              return null;
+            }
+            const [data, gpsData] = await Promise.all([
+              window.exifr.parse(file, {
+                pick: [
+                  'Make', 'Model', 'LensModel', 'Lens',
+                  'FocalLength', 'FNumber', 'ExposureTime',
+                  'ISO', 'ISOSpeedRatings', 'DateTimeOriginal', 'CreateDate', 'ModifyDate'
+                ]
+              }).catch(() => null),
+              typeof window.exifr.gps === 'function'
+                ? window.exifr.gps(file).catch(() => null)
+                : Promise.resolve(null)
+            ]);
+
+            if (!data && !gpsData) return null;
+
+            const safeData = data || {};
+            const make = (safeData.Make || '').trim();
+            let model = (safeData.Model || '').trim();
+            if (make && model && !model.toLowerCase().startsWith(make.toLowerCase())) {
+              model = `${make} ${model}`;
+            }
+            const camera = model || make;
+
+            const lens = (safeData.LensModel || safeData.Lens || '').trim();
+            const focalLength = safeData.FocalLength ? `${Math.round(Number(safeData.FocalLength))}mm` : '';
+            let lensFocal = lens;
+            if (!lensFocal && focalLength) {
+              lensFocal = focalLength;
+            } else if (lensFocal && focalLength && !lensFocal.toLowerCase().includes('mm')) {
+              lensFocal = `${focalLength} • ${lensFocal}`;
+            }
+
+            const aperture = safeData.FNumber ? `f/${Number(safeData.FNumber).toFixed(1).replace(/\.0$/, '')}` : '';
+            const shutter = formatShutterSpeed(safeData.ExposureTime);
+            const isoVal = safeData.ISO || safeData.ISOSpeedRatings;
+            const iso = isoVal ? `ISO ${Array.isArray(isoVal) ? isoVal[0] : isoVal}` : '';
+            const captureDate = formatExifDate(safeData.DateTimeOriginal || safeData.CreateDate || safeData.ModifyDate);
+
+            const gpsCoords = gpsData ? formatGpsCoords(gpsData.latitude, gpsData.longitude) : '';
+
+            const hasAny = Boolean(camera || lensFocal || aperture || shutter || iso || gpsCoords);
+            if (!hasAny) return null;
+
+            return {
+              camera: camera || 'Unknown Camera',
+              lensFocal,
+              aperture,
+              shutter,
+              iso,
+              captureDate,
+              location: gpsCoords,
+              hasGps: Boolean(gpsCoords)
+            };
+          } catch (err) {
+            console.warn('EXIF parse skipped:', err);
+            return null;
+          }
+        }
+
+        /**
+         * Detect whether a file is HEIC / HEIF
+         */
+        function isHeicFile(file) {
+          const name = (file.name || '').toLowerCase();
+          const type = (file.type || '').toLowerCase();
+          return (
+            type === 'image/heic' ||
+            type === 'image/heif' ||
+            name.endsWith('.heic') ||
+            name.endsWith('.heif')
+          );
+        }
+
+        /**
+         * Convert HEIC / HEIF Blob to JPEG Blob client-side using heic2any
+         */
+        async function decodeHeicToBlob(file) {
+          if (typeof window.heic2any !== 'function') {
+            throw new Error('HEIC decoder library is unavailable');
+          }
+          const result = await window.heic2any({
+            blob: file,
+            toType: 'image/jpeg',
+            quality: 0.96
+          });
+          return Array.isArray(result) ? result[0] : result;
+        }
+
+        /**
+         * Load an HTMLImageElement from an object URL
+         */
+        function loadImageFromUrl(url) {
+          return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = (e) => reject(e);
+            img.src = url;
+          });
+        }
+
+        /**
+         * Process uploaded or dropped photograph file
+         */
+        async function handleFile(file) {
+          if (!file) return;
+
+          const baseName = (file.name || 'photo').replace(/\.[^/.]+$/, '');
+          state.fileName = `${baseName}-framed`;
+
+          const heicDetected = isHeicFile(file);
+          if (heicDetected) {
+            el.heicLoadingOverlay.classList.remove('hidden');
+            el.heicLoadingOverlay.classList.add('flex');
+          }
+
+          try {
+            // 1. Always parse EXIF from original raw file first
+            const parsedExif = await parseExifFromFile(file);
+
+            // 2. Convert HEIC/HEIF if required
+            let renderBlob = file;
+            if (heicDetected) {
+              renderBlob = await decodeHeicToBlob(file);
+              state.sourceFormat = 'HEIC Converted';
+            } else {
+              const extMatch = (file.name || '').match(/\.([a-zA-Z0-9]+)$/);
+              state.sourceFormat = extMatch ? extMatch[1].toUpperCase() : 'IMAGE';
+            }
+
+            // 3. Load image into memory
+            const objectUrl = URL.createObjectURL(renderBlob);
+            let img;
+            try {
+              img = await loadImageFromUrl(objectUrl);
+            } catch (decodeErr) {
+              // Fallback for mislabeled HEIC files without .heic extension
+              if (!heicDetected && typeof window.heic2any === 'function') {
+                URL.revokeObjectURL(objectUrl);
+                el.heicLoadingOverlay.classList.remove('hidden');
+                el.heicLoadingOverlay.classList.add('flex');
+                const fallbackBlob = await decodeHeicToBlob(file);
+                const fallbackUrl = URL.createObjectURL(fallbackBlob);
+                img = await loadImageFromUrl(fallbackUrl);
+                URL.revokeObjectURL(fallbackUrl);
+                state.sourceFormat = 'HEIC Converted';
+              } else {
+                URL.revokeObjectURL(objectUrl);
+                throw decodeErr;
+              }
+            }
+            URL.revokeObjectURL(objectUrl);
+
+            state.image = img;
+            cachedBlurCanvas = null;
+
+            // 4. Populate metadata state & snapshot originalMetadata for Reset
+            if (parsedExif) {
+              const extracted = {
+                camera: parsedExif.camera,
+                lensFocal: parsedExif.lensFocal,
+                aperture: parsedExif.aperture,
+                shutter: parsedExif.shutter,
+                iso: parsedExif.iso,
+                captureDate: parsedExif.captureDate,
+                location: parsedExif.location
+              };
+              state.metadata = { ...extracted };
+              state.originalMetadata = { ...extracted };
+              state.hasGpsTag = parsedExif.hasGps;
+              state.exifStatus = 'detected';
+              showToast(
+                state.sourceFormat === 'HEIC Converted'
+                  ? 'HEIC converted & EXIF metadata extracted!'
+                  : 'EXIF metadata extracted automatically!',
+                'success'
+              );
+            } else {
+              const emptyMeta = {
+                camera: '',
+                lensFocal: '',
+                aperture: '',
+                shutter: '',
+                iso: '',
+                captureDate: '',
+                location: ''
+              };
+              state.metadata = { ...emptyMeta };
+              state.originalMetadata = { ...emptyMeta };
+              state.hasGpsTag = false;
+              state.exifStatus = 'missing';
+              showToast(
+                'No EXIF metadata found (may have been stripped by messaging apps). Edit manually in EXIF Data.',
+                'warning'
+              );
+            }
+
+            // 5. Reveal canvas stage & enable export actions
+            el.emptyDropCard.classList.add('hidden');
+            el.canvasContainer.classList.remove('hidden');
+            el.canvasContainer.classList.add('flex');
+            el.btnDownloadJpg.disabled = false;
+            el.btnDownloadPng.disabled = false;
+            el.btnShareImage.disabled = false;
+
+            updateFormatBadge();
+            updateExifBadge();
+            syncInputsFromState();
+            updateResetAvailability();
+            scheduleRender();
+          } catch (err) {
+            console.error(err);
+            showToast('Failed to load photo. Please ensure the image or HEIC file is valid.', 'error');
+          } finally {
+            el.heicLoadingOverlay.classList.add('hidden');
+            el.heicLoadingOverlay.classList.remove('flex');
+          }
+        }
+
+        /**
+         * Generate a procedural high-resolution sample landscape image with realistic EXIF
+         */
+        function loadSamplePhoto() {
+          const sampleCanvas = document.createElement('canvas');
+          sampleCanvas.width = 1800;
+          sampleCanvas.height = 1200;
+          const ctx = sampleCanvas.getContext('2d');
+
+          // Twilight alpine sky gradient
+          const sky = ctx.createLinearGradient(0, 0, 0, 820);
+          sky.addColorStop(0, '#0B132B');
+          sky.addColorStop(0.45, '#1C2541');
+          sky.addColorStop(0.78, '#D97706');
+          sky.addColorStop(1, '#FDE68A');
+          ctx.fillStyle = sky;
+          ctx.fillRect(0, 0, 1800, 1200);
+
+          // Glowing sun disc
+          const sun = ctx.createRadialGradient(1220, 650, 15, 1220, 650, 260);
+          sun.addColorStop(0, 'rgba(255, 251, 235, 0.95)');
+          sun.addColorStop(0.25, 'rgba(253, 224, 71, 0.55)');
+          sun.addColorStop(1, 'rgba(245, 158, 11, 0)');
+          ctx.fillStyle = sun;
+          ctx.fillRect(0, 0, 1800, 1200);
+
+          // Distant mountain ridge
+          ctx.fillStyle = '#1E293B';
+          ctx.beginPath();
+          ctx.moveTo(0, 820);
+          ctx.lineTo(280, 560);
+          ctx.lineTo(540, 710);
+          ctx.lineTo(890, 480);
+          ctx.lineTo(1280, 690);
+          ctx.lineTo(1560, 530);
+          ctx.lineTo(1800, 660);
+          ctx.lineTo(1800, 1200);
+          ctx.lineTo(0, 1200);
+          ctx.closePath();
+          ctx.fill();
+
+          // Foreground silhouette ridge
+          ctx.fillStyle = '#090D16';
+          ctx.beginPath();
+          ctx.moveTo(0, 920);
+          ctx.lineTo(410, 740);
+          ctx.lineTo(790, 880);
+          ctx.lineTo(1180, 710);
+          ctx.lineTo(1800, 860);
+          ctx.lineTo(1800, 1200);
+          ctx.lineTo(0, 1200);
+          ctx.closePath();
+          ctx.fill();
+
+          const img = new Image();
+          img.onload = () => {
+            state.image = img;
+            state.fileName = 'mount-prau-sample';
+            state.sourceFormat = 'SAMPLE RAW';
+            state.exifStatus = 'sample';
+            state.hasGpsTag = false;
+            cachedBlurCanvas = null;
+
+            state.metadata = { ...DEFAULT_METADATA };
+            state.originalMetadata = { ...DEFAULT_METADATA };
+
+            el.emptyDropCard.classList.add('hidden');
+            el.canvasContainer.classList.remove('hidden');
+            el.canvasContainer.classList.add('flex');
+            el.btnDownloadJpg.disabled = false;
+            el.btnDownloadPng.disabled = false;
+            el.btnShareImage.disabled = false;
+
+            updateFormatBadge();
+            updateExifBadge();
+            syncInputsFromState();
+            updateResetAvailability();
+            scheduleRender();
+            showToast('Sample photo & EXIF loaded!', 'info');
+          };
+          img.src = sampleCanvas.toDataURL('image/jpeg', 0.95);
+        }
+
+        /**
+         * Trace a rounded rectangle path on a 2D canvas context
+         */
+        function traceRoundedRect(ctx, x, y, w, h, r) {
+          const radius = Math.max(0, Math.min(r, w / 2, h / 2));
+          ctx.beginPath();
+          ctx.moveTo(x + radius, y);
+          ctx.arcTo(x + w, y, x + w, y + h, radius);
+          ctx.arcTo(x + w, y + h, x, y + h, radius);
+          ctx.arcTo(x, y + h, x, y, radius);
+          ctx.arcTo(x, y, x + w, y, radius);
+          ctx.closePath();
+        }
+
+        /**
+         * Measure and truncate text with an ellipsis so it never exceeds maxWidth
+         */
+        function fitTextWithEllipsis(ctx, text, maxWidth) {
+          if (!text || maxWidth <= 0) return '';
+          if (ctx.measureText(text).width <= maxWidth) return text;
+
+          const ellipsis = '…';
+          const ellipsisW = ctx.measureText(ellipsis).width;
+          if (ellipsisW >= maxWidth) return '';
+
+          let low = 0;
+          let high = text.length;
+          while (low < high) {
+            const mid = Math.ceil((low + high) / 2);
+            const candidate = text.slice(0, mid) + ellipsis;
+            if (ctx.measureText(candidate).width <= maxWidth) {
+              low = mid;
+            } else {
+              high = mid - 1;
+            }
+          }
+          return low > 0 ? text.slice(0, low).trimEnd() + ellipsis : '';
+        }
+
+        /**
+         * Build cached blurred background canvas for Blur Backdrop preset
+         */
+        function getBlurredBackdrop(img, w, h) {
+          const key = `${img.width}x${img.height}_${w}x${h}`;
+          if (cachedBlurCanvas && cachedBlurKey === key) {
+            return cachedBlurCanvas;
+          }
+          const off = document.createElement('canvas');
+          off.width = w;
+          off.height = h;
+          const octx = off.getContext('2d');
+
+          const scale = Math.max(w / img.width, h / img.height) * 1.18;
+          const sw = img.width * scale;
+          const sh = img.height * scale;
+          const sx = (w - sw) / 2;
+          const sy = (h - sh) / 2;
+
+          octx.filter = `blur(${Math.max(24, Math.round(Math.min(w, h) * 0.045))}px) brightness(0.68) saturate(1.25)`;
+          octx.drawImage(img, sx, sy, sw, sh);
+          octx.filter = 'none';
+
+          cachedBlurCanvas = off;
+          cachedBlurKey = key;
+          return off;
+        }
+
+        /**
+         * Render the framed photograph and EXIF telemetry onto targetCanvas
+         */
+        function renderCompositeCanvas(targetCanvas, maxLongEdge = 1600) {
+          if (!state.image) return;
+
+          const img = state.image;
+          const presetCfg = PRESETS[state.preset] || PRESETS.classic;
+          const paddingMult = Number(state.style.padding);
+          const fontScale = Number(state.style.fontScale);
+
+          // Scale source image to target long edge
+          const srcLong = Math.max(img.width, img.height);
+          const scaleFactor = srcLong > maxLongEdge ? maxLongEdge / srcLong : 1;
+          let drawW = Math.round(img.width * scaleFactor);
+          let drawH = Math.round(img.height * scaleFactor);
+
+          const baseSide = Math.min(drawW, drawH);
+          const sidePad = Math.round(baseSide * 0.055 * paddingMult);
+          const topPad = sidePad;
+          const footerH = Math.round(baseSide * 0.145 * presetCfg.footerScale * Math.max(0.85, fontScale * 0.95));
+
+          let canvasW = drawW + sidePad * 2;
+          let canvasH = drawH + topPad + footerH;
+          let photoX = sidePad;
+          let photoY = topPad;
+
+          // Adjust canvas dimensions if fixed Aspect Ratio is selected
+          if (state.aspectRatio !== 'auto') {
+            const ratioMap = {
+              '4:5': 4 / 5,
+              '1:1': 1,
+              '16:9': 16 / 9
+            };
+            const targetRatio = ratioMap[state.aspectRatio];
+            if (targetRatio) {
+              const currentRatio = canvasW / canvasH;
+              if (currentRatio < targetRatio) {
+                canvasW = Math.round(canvasH * targetRatio);
+              } else if (currentRatio > targetRatio) {
+                canvasH = Math.round(canvasW / targetRatio);
+              }
+              const availW = canvasW - sidePad * 2;
+              const availH = canvasH - topPad - footerH;
+              const fitScale = Math.min(availW / img.width, availH / img.height);
+              drawW = Math.round(img.width * fitScale);
+              drawH = Math.round(img.height * fitScale);
+              photoX = Math.round((canvasW - drawW) / 2);
+              photoY = Math.round(topPad + (availH - drawH) / 2);
+            }
+          }
+
+          targetCanvas.width = canvasW;
+          targetCanvas.height = canvasH;
+          const ctx = targetCanvas.getContext('2d');
+
+          // 1. Paint Frame Background
+          if (state.preset === 'blur') {
+            const blurBg = getBlurredBackdrop(img, canvasW, canvasH);
+            ctx.drawImage(blurBg, 0, 0, canvasW, canvasH);
+          } else {
+            ctx.fillStyle = presetCfg.bg;
+            ctx.fillRect(0, 0, canvasW, canvasH);
+          }
+
+          // 2. Paint Photo Drop Shadow & Rounded Clip
+          const scaledRadius = Math.round((Number(state.style.cornerRadius) / 600) * baseSide);
+          const hasShadow = state.style.dropShadow || state.preset === 'blur';
+          const effectiveShadow = hasShadow ? 0.65 : 0;
+
+          if (effectiveShadow > 0) {
+            ctx.save();
+            ctx.shadowColor = `rgba(0, 0, 0, ${(0.45 * effectiveShadow).toFixed(3)})`;
+            ctx.shadowBlur = Math.round(baseSide * 0.045 * effectiveShadow);
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = Math.round(baseSide * 0.018 * effectiveShadow);
+            ctx.fillStyle = '#000000';
+            traceRoundedRect(ctx, photoX, photoY, drawW, drawH, scaledRadius);
+            ctx.fill();
+            ctx.restore();
+          }
+
+          ctx.save();
+          traceRoundedRect(ctx, photoX, photoY, drawW, drawH, scaledRadius);
+          ctx.clip();
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(img, photoX, photoY, drawW, drawH);
+          ctx.restore();
+
+          // 3. Render EXIF Metadata Footer with Precision Text Measurement & Truncation
+          const fontName = state.preset === 'retro' ? 'JetBrains Mono' : state.style.fontFamily;
+          const footerTop = photoY + drawH;
+          const footerCenterY = footerTop + footerH * 0.52;
+          const leftAnchorX = photoX;
+          const rightAnchorX = photoX + drawW;
+
+          const primarySize = Math.max(14, Math.round(baseSide * 0.024 * fontScale));
+          const secondarySize = Math.max(11, Math.round(baseSide * 0.0175 * fontScale));
+
+          const cameraText = (state.metadata.camera || '').trim();
+          const lensLine = (state.metadata.lensFocal || '').trim();
+
+          const exposureParts = [state.metadata.aperture, state.metadata.shutter, state.metadata.iso]
+            .map(s => (s || '').trim())
+            .filter(Boolean);
+          const exposureLine = exposureParts.join('   ');
+
+          const metaRightSubParts = [
+            state.style.showDate ? (state.metadata.captureDate || '').trim() : '',
+            state.style.showLocation ? (state.metadata.location || '').trim() : ''
+          ].filter(Boolean);
+          const dateNoteLine = metaRightSubParts.join('  •  ');
+
+          ctx.save();
+          ctx.textBaseline = 'middle';
+
+          if (state.preset === 'retro') {
+            // Centered Polaroid Monospace Stamp with max-width guard
+            ctx.textAlign = 'center';
+            const centerX = canvasW / 2;
+            const maxRetroW = drawW * 0.94;
+            const rawLine1 = [cameraText, lensLine].filter(Boolean).join('  |  ');
+            const rawLine2 = [exposureLine, dateNoteLine].filter(Boolean).join('  •  ');
+
+            if (rawLine1 && rawLine2) {
+              ctx.font = `600 ${primarySize}px "${fontName}", monospace`;
+              ctx.fillStyle = presetCfg.textPrimary;
+              ctx.fillText(fitTextWithEllipsis(ctx, rawLine1, maxRetroW), centerX, footerCenterY - primarySize * 0.65);
+
+              ctx.font = `400 ${secondarySize}px "${fontName}", monospace`;
+              ctx.fillStyle = presetCfg.textSecondary;
+              ctx.fillText(fitTextWithEllipsis(ctx, rawLine2, maxRetroW), centerX, footerCenterY + secondarySize * 0.85);
+            } else {
+              const singleLine = rawLine1 || rawLine2;
+              ctx.font = `600 ${primarySize}px "${fontName}", monospace`;
+              ctx.fillStyle = presetCfg.textPrimary;
+              ctx.fillText(fitTextWithEllipsis(ctx, singleLine, maxRetroW), centerX, footerCenterY);
+            }
+          } else {
+            // Split Gallery Layout with Dynamic Column Width Allocation
+            let textStartX = leftAnchorX;
+
+            if (state.style.showAccentDot && (cameraText || lensLine)) {
+              const dotRadius = Math.max(4, Math.round(primarySize * 0.34));
+              ctx.fillStyle = presetCfg.accent;
+              ctx.beginPath();
+              ctx.arc(leftAnchorX + dotRadius, footerCenterY, dotRadius, 0, Math.PI * 2);
+              ctx.fill();
+              textStartX += dotRadius * 2 + Math.round(primarySize * 0.55);
+            }
+
+            const totalAvailW = Math.max(40, rightAnchorX - textStartX);
+            const hasLeft = Boolean(cameraText || lensLine);
+            const hasRight = Boolean(exposureLine || dateNoteLine);
+            const minGap = hasLeft && hasRight ? Math.max(16, Math.round(primarySize * 1.15)) : 0;
+
+            // Measure natural widths of left and right columns
+            const leftPrimaryFont = `700 ${primarySize}px "${fontName}", sans-serif`;
+            const leftSecondaryFont = `400 ${secondarySize}px "${fontName}", sans-serif`;
+            const rightPrimaryFont = `600 ${primarySize}px "JetBrains Mono", "${fontName}", monospace`;
+            const rightSecondaryFont = `400 ${secondarySize}px "${fontName}", sans-serif`;
+
+            ctx.font = leftPrimaryFont;
+            const camW = cameraText ? ctx.measureText(cameraText).width : 0;
+            ctx.font = leftSecondaryFont;
+            const lensW = lensLine ? ctx.measureText(lensLine).width : 0;
+            const leftNaturalW = Math.max(camW, lensW);
+
+            ctx.font = rightPrimaryFont;
+            const expW = exposureLine ? ctx.measureText(exposureLine).width : 0;
+            ctx.font = rightSecondaryFont;
+            const subRightW = dateNoteLine ? ctx.measureText(dateNoteLine).width : 0;
+            const rightNaturalW = Math.max(expW, subRightW);
+
+            let leftMaxW = totalAvailW;
+            let rightMaxW = totalAvailW;
+
+            if (hasLeft && hasRight) {
+              const usableW = Math.max(20, totalAvailW - minGap);
+              if (leftNaturalW + rightNaturalW <= usableW) {
+                leftMaxW = leftNaturalW;
+                rightMaxW = rightNaturalW;
+              } else {
+                // Allocate proportional shares while guaranteeing neither side is starved
+                const totalNat = Math.max(1, leftNaturalW + rightNaturalW);
+                const rawLeftShare = Math.min(0.62, Math.max(0.38, leftNaturalW / totalNat));
+                leftMaxW = Math.floor(usableW * rawLeftShare);
+                rightMaxW = Math.max(10, usableW - leftMaxW);
+              }
+            }
+
+            // Left Block
+            ctx.textAlign = 'left';
+            if (cameraText && lensLine) {
+              ctx.font = leftPrimaryFont;
+              ctx.fillStyle = presetCfg.textPrimary;
+              ctx.fillText(fitTextWithEllipsis(ctx, cameraText, leftMaxW), textStartX, footerCenterY - primarySize * 0.58);
+
+              ctx.font = leftSecondaryFont;
+              ctx.fillStyle = presetCfg.textSecondary;
+              ctx.fillText(fitTextWithEllipsis(ctx, lensLine, leftMaxW), textStartX, footerCenterY + secondarySize * 0.78);
+            } else if (cameraText || lensLine) {
+              ctx.font = leftPrimaryFont;
+              ctx.fillStyle = presetCfg.textPrimary;
+              ctx.fillText(fitTextWithEllipsis(ctx, cameraText || lensLine, leftMaxW), textStartX, footerCenterY);
+            }
+
+            // Right Block
+            ctx.textAlign = 'right';
+            if (exposureLine && dateNoteLine) {
+              ctx.font = rightPrimaryFont;
+              ctx.fillStyle = presetCfg.textPrimary;
+              ctx.fillText(fitTextWithEllipsis(ctx, exposureLine, rightMaxW), rightAnchorX, footerCenterY - primarySize * 0.58);
+
+              ctx.font = rightSecondaryFont;
+              ctx.fillStyle = presetCfg.textSecondary;
+              ctx.fillText(fitTextWithEllipsis(ctx, dateNoteLine, rightMaxW), rightAnchorX, footerCenterY + secondarySize * 0.78);
+            } else if (exposureLine || dateNoteLine) {
+              ctx.font = rightPrimaryFont;
+              ctx.fillStyle = presetCfg.textPrimary;
+              ctx.fillText(fitTextWithEllipsis(ctx, exposureLine || dateNoteLine, rightMaxW), rightAnchorX, footerCenterY);
+            }
+          }
+
+          ctx.restore();
+
+          // Update resolution badge
+          el.resolutionText.textContent = `${canvasW} × ${canvasH} px`;
+          el.resolutionBadge.classList.remove('hidden');
+          el.resolutionBadge.classList.add('inline-flex');
+        }
+
+        /**
+         * Debounced preview render via requestAnimationFrame
+         */
+        function scheduleRender() {
+          if (!state.image) return;
+          if (renderRafId) {
+            cancelAnimationFrame(renderRafId);
+          }
+          renderRafId = requestAnimationFrame(() => {
+            renderCompositeCanvas(el.previewCanvas, 1600);
+          });
+        }
+
+        /**
+         * Export high-resolution image (up to 3600px long edge)
+         */
+        function exportImage(mimeType, quality) {
+          if (!state.image) return;
+          const exportCanvas = document.createElement('canvas');
+          renderCompositeCanvas(exportCanvas, 3600);
+
+          const ext = mimeType === 'image/png' ? 'png' : 'jpg';
+          exportCanvas.toBlob(
+            (blob) => {
+              if (!blob) {
+                showToast('Failed to export image.', 'error');
+                return;
+              }
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = `${state.fileName}.${ext}`;
+              document.body.appendChild(link);
+              link.click();
+              link.remove();
+              setTimeout(() => URL.revokeObjectURL(url), 1500);
+              showToast(`Exported ${state.fileName}.${ext}`, 'success');
+            },
+            mimeType,
+            quality
+          );
+        }
+
+        /**
+         * Share framed photo via Web Share API
+         */
+        function shareImage() {
+          if (!state.image || !navigator.share) return;
+          const shareCanvas = document.createElement('canvas');
+          renderCompositeCanvas(shareCanvas, 2400);
+
+          shareCanvas.toBlob(async (blob) => {
+            if (!blob) return;
+            const file = new File([blob], `${state.fileName}.jpg`, { type: 'image/jpeg' });
+            try {
+              if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                await navigator.share({
+                  files: [file],
+                  title: 'FramEX',
+                  text: `${state.metadata.camera} • ${state.metadata.lensFocal}`
+                });
+              } else {
+                showToast('Direct file sharing is not supported in this browser. Use Download instead.', 'warning');
+              }
+            } catch (err) {
+              if (err && err.name !== 'AbortError') {
+                showToast('Failed to share photo.', 'error');
+              }
+            }
+          }, 'image/jpeg', 0.94);
+        }
+
+        /**
+         * Bind all UI interactive listeners
+         */
+        function bindEvents() {
+          // Dark / Light Mode toggle
+          el.btnThemeToggle.addEventListener('click', () => {
+            const currentlyDark = document.documentElement.classList.contains('dark');
+            applyTheme(currentlyDark ? 'light' : 'dark');
+          });
+
+          // Upload triggers
+          [el.btnUploadHeader, el.btnUploadEmpty].forEach(btn => {
+            btn.addEventListener('click', () => el.fileInput.click());
+          });
+
+          el.fileInput.addEventListener('change', (e) => {
+            const file = e.target.files && e.target.files[0];
+            if (file) handleFile(file);
+            e.target.value = '';
+          });
+
+          // Sample triggers
+          [el.btnSampleHeader, el.btnSampleEmpty].forEach(btn => {
+            btn.addEventListener('click', loadSamplePhoto);
+          });
+
+          // Reset EXIF Metadata to original detected values
+          el.btnResetMetadata.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (!state.image) return;
+            state.metadata = { ...state.originalMetadata };
+            syncInputsFromState();
+            scheduleRender();
+            showToast('EXIF metadata restored to original values.', 'info');
+          });
+
+          // Reset Frame & Typography to defaults
+          el.btnResetStyle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (!state.image) return;
+            state.preset = 'classic';
+            state.aspectRatio = 'auto';
+            state.style = { ...DEFAULT_STYLE };
+            syncInputsFromState();
+            scheduleRender();
+            showToast('Frame style & typography reset to default.', 'info');
+          });
+
+          // Drag & drop stage
+          ['dragenter', 'dragover'].forEach(evtName => {
+            el.dropZoneStage.addEventListener(evtName, (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              el.dragOverlay.classList.remove('hidden');
+              el.dragOverlay.classList.add('flex');
+            });
+          });
+
+          ['dragleave', 'drop'].forEach(evtName => {
+            el.dropZoneStage.addEventListener(evtName, (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              el.dragOverlay.classList.add('hidden');
+              el.dragOverlay.classList.remove('flex');
+            });
+          });
+
+          el.dropZoneStage.addEventListener('drop', (e) => {
+            const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+            if (file) handleFile(file);
+          });
+
+          // Preset cards & quick preset pills
+          function applyPreset(presetKey) {
+            if (!PRESETS[presetKey]) return;
+            state.preset = presetKey;
+            if (presetKey === 'leica') {
+              state.style.showAccentDot = true;
+            }
+            syncInputsFromState();
+            scheduleRender();
+          }
+
+          document.querySelectorAll('.preset-card').forEach(card => {
+            card.addEventListener('click', () => applyPreset(card.dataset.preset));
+          });
+
+          document.querySelectorAll('.quick-preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => applyPreset(btn.dataset.quickPreset));
+          });
+
+          // Aspect ratio buttons
+          document.querySelectorAll('.ratio-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+              state.aspectRatio = btn.dataset.ratio;
+              syncInputsFromState();
+              scheduleRender();
+            });
+          });
+
+          // Typography font buttons
+          document.querySelectorAll('.font-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+              state.style.fontFamily = btn.dataset.font;
+              syncInputsFromState();
+              scheduleRender();
+            });
+          });
+
+          // Live EXIF Metadata Text Inputs
+          const metaBindings = [
+            [el.inputCamera, 'camera'],
+            [el.inputLensFocal, 'lensFocal'],
+            [el.inputAperture, 'aperture'],
+            [el.inputShutter, 'shutter'],
+            [el.inputIso, 'iso'],
+            [el.inputCaptureDate, 'captureDate'],
+            [el.inputLocation, 'location']
+          ];
+          metaBindings.forEach(([inputEl, key]) => {
+            inputEl.addEventListener('input', () => {
+              state.metadata[key] = inputEl.value;
+              scheduleRender();
+            });
+          });
+
+          // Range Sliders
+          el.sliderPadding.addEventListener('input', () => {
+            state.style.padding = parseFloat(el.sliderPadding.value);
+            el.valPadding.textContent = `${state.style.padding.toFixed(2)}×`;
+            scheduleRender();
+          });
+
+          el.sliderRadius.addEventListener('input', () => {
+            state.style.cornerRadius = parseInt(el.sliderRadius.value, 10);
+            el.valRadius.textContent = `${state.style.cornerRadius} px`;
+            scheduleRender();
+          });
+
+          el.sliderFontScale.addEventListener('input', () => {
+            state.style.fontScale = parseFloat(el.sliderFontScale.value);
+            el.valFontScale.textContent = `${state.style.fontScale.toFixed(2)}×`;
+            scheduleRender();
+          });
+
+          // Toggle Switches
+          el.toggleShowDate.addEventListener('change', () => {
+            state.style.showDate = el.toggleShowDate.checked;
+            scheduleRender();
+          });
+
+          el.toggleLocation.addEventListener('change', () => {
+            state.style.showLocation = el.toggleLocation.checked;
+            scheduleRender();
+          });
+
+          el.toggleAccentDot.addEventListener('change', () => {
+            state.style.showAccentDot = el.toggleAccentDot.checked;
+            scheduleRender();
+          });
+
+          el.toggleDropShadow.addEventListener('change', () => {
+            state.style.dropShadow = el.toggleDropShadow.checked;
+            scheduleRender();
+          });
+
+          // Inspector Filter Tabs
+          document.querySelectorAll('.inspector-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+              const target = tab.dataset.tab;
+              document.querySelectorAll('.inspector-tab').forEach(t => {
+                const isActive = t === tab;
+                t.classList.toggle('bg-indigo-600', isActive);
+                t.classList.toggle('text-white', isActive);
+                t.classList.toggle('font-semibold', isActive);
+                t.classList.toggle('text-slate-600', !isActive);
+                t.classList.toggle('dark:text-slate-400', !isActive);
+                t.classList.toggle('font-medium', !isActive);
+              });
+
+              document.querySelectorAll('.inspector-section').forEach(sec => {
+                const show = target === 'all' || sec.dataset.section === target;
+                sec.classList.toggle('hidden', !show);
+              });
+            });
+          });
+
+          // Accordion Expand/Collapse
+          document.querySelectorAll('.accordion-trigger').forEach(trigger => {
+            trigger.addEventListener('click', () => {
+              const card = trigger.closest('.inspector-section');
+              const content = card.querySelector('.accordion-content');
+              const chevron = card.querySelector('.accordion-chevron');
+              const collapsed = content.classList.toggle('hidden');
+              if (chevron) {
+                chevron.style.transform = collapsed ? 'rotate(-90deg)' : 'rotate(0deg)';
+              }
+            });
+          });
+
+          // Export & Share Buttons
+          el.btnDownloadJpg.addEventListener('click', () => exportImage('image/jpeg', 0.95));
+          el.btnDownloadPng.addEventListener('click', () => exportImage('image/png', 1.0));
+          el.btnShareImage.addEventListener('click', shareImage);
+        }
+
+        // Initial Boot
+        initTheme();
+        updateExifBadge();
+        syncInputsFromState();
+        updateResetAvailability();
+        bindEvents();
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bootStudio);
+      } else {
+        bootStudio();
+      }
+    })();
+  </script>
+</body>
+</html>
