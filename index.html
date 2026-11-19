@@ -11,7 +11,7 @@
   <!-- Google Fonts: Inter, JetBrains Mono, Playfair Display -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&display=swap" rel="stylesheet" />
 
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -26,7 +26,7 @@
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Inter', 'system-ui', 'sans-serif'],
+            sans: ['Instrument Sans', 'Inter', 'system-ui', 'sans-serif'],
             mono: ['JetBrains Mono', 'monospace'],
             serif: ['Playfair Display', 'Georgia', 'serif'],
           }
@@ -34,510 +34,102 @@
       }
     };
   </script>
+<style>
+:root{--bg:#E9EDF5;--panel:#FFFFFF;--stage:#D3DAE7;--field:#F2F5FA;--ink:#0B1220;--muted:#46526A;--line:#B2BDD0;--accent:#1D4ED8;--accent-ink:#FFFFFF;--accent-soft:#DCE6FB;--warn:#8A5A00}
+.dark{--bg:#05080F;--panel:#0C121D;--stage:#030509;--field:#060A12;--ink:#F1F5FB;--muted:#9AA8C0;--line:#26344D;--accent:#5B9BFF;--accent-ink:#04101F;--accent-soft:#12223F;--warn:#E0B65C}
+body{background:var(--bg)!important;color:var(--ink)!important;font-family:'Instrument Sans','Inter',system-ui,sans-serif}
+::selection{background:var(--accent-soft);color:var(--ink)}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important}}
+
+/* generic overrides for leftover utility colors */
+[class*="text-slate-"]:not(.swatch *){color:var(--muted)!important}
+[class*="text-slate-9"],[class*="text-slate-8"],[class*="dark:text-white"]{color:var(--ink)!important}
+[class*="text-indigo-"],[class*="text-emerald-"],[class*="text-amber-"]{color:var(--accent)!important}
+p[class*="text-amber-"]{color:var(--warn)!important}
+[class*="border-slate-"]:not(.swatch),[class*="dark:border-["]:not(.swatch){border-color:var(--line)!important}
+.font-mono{letter-spacing:0}
+
+/* header */
+header{background:var(--panel)!important;border-color:var(--line)!important;backdrop-filter:none!important}
+header>div:first-child>div:first-child{background:var(--accent)!important;background-image:none!important;border-radius:8px!important;box-shadow:none!important}
+header>div:first-child>div:first-child svg{color:var(--accent-ink)!important}
+header span[title]{background:transparent!important;border:1px solid var(--line)!important;color:var(--muted)!important;font-family:inherit!important;border-radius:6px!important;font-size:11px!important}
+#btnThemeToggle,#btnSampleHeader{background:transparent!important;border-color:transparent!important;box-shadow:none!important}
+#btnThemeToggle:hover,#btnSampleHeader:hover{background:var(--accent-soft)!important}
+#iconSun,#iconMoon{color:var(--muted)!important}
+
+/* buttons */
+#btnUploadHeader,#btnUploadEmpty,#btnDownloadJpg{background:var(--accent)!important;color:var(--accent-ink)!important;border:0!important;box-shadow:none!important;border-radius:8px!important}
+#btnUploadHeader:hover,#btnUploadEmpty:hover,#btnDownloadJpg:hover{filter:brightness(1.08)}
+#btnUploadHeader *,#btnUploadEmpty *,#btnDownloadJpg *{color:inherit!important}
+#btnSampleEmpty,#btnDownloadPng,#btnShareImage,#btnResetMetadata,#btnResetStyle{background:transparent!important;color:var(--ink)!important;border:1px solid var(--line)!important;box-shadow:none!important;border-radius:8px!important}
+#btnSampleEmpty:hover,#btnDownloadPng:hover,#btnShareImage:hover,#btnResetMetadata:hover,#btnResetStyle:hover{background:var(--accent-soft)!important}
+#btnShareImage *,#btnDownloadPng *{color:inherit!important}
+
+/* stage */
+#dropZoneStage{background:var(--stage)!important;background-image:none!important;backdrop-filter:none!important;border-color:var(--line)!important}
+#emptyDropCard{background:var(--panel)!important;border:1px dashed var(--line)!important;border-radius:14px!important;box-shadow:none!important}
+#emptyDropCard:hover{border-color:var(--accent)!important}
+#emptyDropCard>div:first-child{background:var(--accent-soft)!important;border:0!important;border-radius:12px!important}
+#formatBadge,#exifStatusBadge,#resolutionBadge{background:var(--panel)!important;border:1px solid var(--line)!important;color:var(--muted)!important;box-shadow:none!important;backdrop-filter:none!important}
+#formatBadge *,#resolutionBadge *{color:var(--muted)!important}
+#exifStatusBadge>span:first-child{background:var(--muted)!important;animation:none!important}
+#exifStatusBadge>span.bg-emerald-400,#exifStatusBadge>span.bg-indigo-400{background:var(--accent)!important}
+#exifStatusBadge>span.bg-amber-400{background:var(--warn)!important}
+#dropZoneStage>div:last-child>div{background:var(--panel)!important;border:1px solid var(--line)!important;border-radius:10px!important;box-shadow:none!important;backdrop-filter:none!important}
+#previewCanvas{outline:1px solid var(--line);max-width:100%;max-height:41vh;width:auto;height:auto;object-fit:contain;border-radius:2px;box-shadow:0 12px 32px -12px rgba(0,0,0,.55)}
+@media (min-width:640px){#previewCanvas{max-height:43vh}}
+@media (min-width:1024px){#previewCanvas{max-height:100%}}
+#heicLoadingOverlay{background:color-mix(in srgb,var(--panel) 92%,transparent)!important;border:1px solid var(--line)!important;backdrop-filter:none!important}
+#heicLoadingOverlay>div:first-child{border-color:var(--line)!important;border-top-color:var(--accent)!important}
+#dragOverlay{background:rgba(5,8,15,.9)!important;border-color:var(--accent)!important}
+#dragOverlay *{color:#F1F5FB!important}
+#dragOverlay>div:first-child{background:transparent!important;border-color:rgba(231,236,233,.4)!important}
+#toastContainer>div{border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.15)}
+
+/* quick preset strip */
+.quick-preset-btn{border-radius:7px!important;color:var(--muted)!important;background:transparent!important}
+.quick-preset-btn:hover{color:var(--ink)!important}
+.quick-preset-btn.is-active{background:var(--accent-soft)!important;color:var(--accent)!important;font-weight:600}
+
+/* inspector */
+aside{background:var(--panel)!important;border-color:var(--line)!important}
+aside>div:first-child{background:var(--panel)!important;border-color:var(--line)!important;box-shadow:none!important;backdrop-filter:none!important}
+.inspector-tab{border-radius:7px!important;color:var(--muted)!important;background:transparent!important;box-shadow:none!important}
+.inspector-tab:hover{background:var(--accent-soft)!important}
+.inspector-tab.is-active{background:var(--accent-soft)!important;color:var(--accent)!important;font-weight:600}
+.inspector-section{background:transparent!important;border:0!important;border-bottom:1px solid var(--line)!important;border-radius:0!important;overflow:visible!important}
+.inspector-section [class*="hover:bg-"]:hover{background:transparent!important}
+.inspector-section>div:first-child,.inspector-section>button{padding-left:0!important;padding-right:0!important}
+.inspector-section .accordion-content{padding-left:0!important;padding-right:0!important}
+.inspector-section [data-lucide]{color:var(--muted)!important}
+.inspector-section input[type=text]{background:var(--field)!important;border:1px solid var(--line)!important;color:var(--ink)!important;border-radius:8px!important}
+.inspector-section input[type=text]:focus{border-color:var(--accent)!important;outline:none}
+.ratio-btn,.font-btn{background:transparent!important;border:1px solid var(--line)!important;color:var(--muted)!important;border-radius:8px!important}
+.ratio-btn:hover,.font-btn:hover{color:var(--ink)!important}
+.ratio-btn.is-active,.font-btn.is-active{background:var(--accent-soft)!important;border-color:var(--accent)!important;color:var(--ink)!important}
+.preset-card{background:transparent!important;border:1px solid var(--line)!important;border-radius:10px!important;box-shadow:none!important}
+.preset-card:hover{border-color:var(--muted)!important}
+.preset-card.is-active{background:var(--accent-soft)!important;border-color:var(--accent)!important}
+.preset-check{border-color:var(--line)!important}
+.preset-card.is-active .preset-check{background:var(--accent)!important;border-color:var(--accent)!important}
+.preset-check span{background:var(--accent-ink)!important}
+.inspector-section label.flex.items-center.justify-between{background:var(--field)!important;border:1px solid var(--line)!important;border-radius:8px!important}
+input[type=checkbox]{accent-color:var(--accent)}
+.support-link{background:transparent!important;border:1px solid var(--line)!important;border-radius:10px!important}
+.support-link a:hover{background:var(--accent-soft)!important}
+.support-link span[class*="bg-amber"]{background:var(--accent-soft)!important;border-color:transparent!important}
+
+/* sliders + scrollbar */
+input[type=range].studio-slider{-webkit-appearance:none;appearance:none;width:100%;height:4px;background:var(--line);border-radius:999px;outline:none}
+input[type=range].studio-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);border:2px solid var(--panel);box-shadow:0 0 0 1px var(--accent);cursor:pointer}
+input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--accent);border:2px solid var(--panel);cursor:pointer}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:999px}
+</style>
 
-  <style>
-    /* Subtle architectural dot grid for the studio canvas stage (Light & Dark) */
-    .studio-grid-bg {
-      background-color: #F1F5F9;
-      background-image: radial-gradient(#CBD5E1 1px, transparent 1px);
-      background-size: 20px 20px;
-    }
-    .dark .studio-grid-bg {
-      background-color: #0E1015;
-      background-image: radial-gradient(#262B36 1px, transparent 1px);
-      background-size: 20px 20px;
-    }
-
-    /* Custom precision range sliders */
-    input[type="range"].studio-slider {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 100%;
-      height: 5px;
-      background: #CBD5E1;
-      border-radius: 999px;
-      outline: none;
-    }
-    .dark input[type="range"].studio-slider {
-      background: #262B36;
-    }
-    input[type="range"].studio-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: #6366F1;
-      border: 2px solid #E0E7FF;
-      cursor: pointer;
-      box-shadow: 0 0 10px rgba(99, 102, 241, 0.45);
-      transition: transform 0.15s ease, background-color 0.15s ease;
-    }
-    input[type="range"].studio-slider::-webkit-slider-thumb:hover {
-      transform: scale(1.15);
-      background: #818CF8;
-    }
-    input[type="range"].studio-slider::-moz-range-thumb {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: #6366F1;
-      border: 2px solid #E0E7FF;
-      cursor: pointer;
-    }
-
-    /* Custom subtle scrollbar */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #F8FAFC;
-    }
-    .dark ::-webkit-scrollbar-track {
-      background: #0B0D10;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #CBD5E1;
-      border-radius: 999px;
-    }
-    .dark ::-webkit-scrollbar-thumb {
-      background: #262B36;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #94A3B8;
-    }
-    .dark ::-webkit-scrollbar-thumb:hover {
-      background: #374151;
-    }
-
-    /* Enlarged Mobile & Desktop Canvas Presentation */
-    #previewCanvas {
-      max-width: 100%;
-      max-height: 41vh;
-      width: auto;
-      height: auto;
-      object-fit: contain;
-      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.75);
-      transition: opacity 0.2s ease;
-    }
-    @media (min-width: 640px) {
-      #previewCanvas {
-        max-height: 43vh;
-      }
-    }
-    @media (min-width: 1024px) {
-      #previewCanvas {
-        max-height: 100%;
-      }
-    }
-  </style>
-  <style>
-    body {
-      background: #f7f7f5 !important;
-      color: #242424 !important;
-    }
-
-    .dark body {
-      background: #171717 !important;
-      color: #ececec !important;
-    }
-
-    header {
-      background: #fff !important;
-      border-color: #e6e6e6 !important;
-      backdrop-filter: none !important;
-    }
-
-    .dark header {
-      background: #1c1c1c !important;
-      border-color: #333 !important;
-    }
-
-    header > div:first-child > div:first-child {
-      background: #333 !important;
-      background-image: none !important;
-      border-radius: 9px !important;
-      box-shadow: none !important;
-    }
-
-    #btnThemeToggle,
-    #btnSampleHeader {
-      background: transparent !important;
-      border-color: transparent !important;
-      box-shadow: none !important;
-    }
-
-    #btnUploadHeader,
-    #btnUploadEmpty,
-    #btnDownloadJpg {
-      background: #222 !important;
-      color: #fff !important;
-      border-color: #222 !important;
-      box-shadow: none !important;
-    }
-
-    #btnUploadHeader:hover,
-    #btnUploadEmpty:hover,
-    #btnDownloadJpg:hover {
-      background: #000 !important;
-    }
-
-    #dropZoneStage {
-      background: #f1f1f1 !important;
-      background-image: none !important;
-      border-color: #ddd !important;
-      backdrop-filter: none !important;
-    }
-
-    .dark #dropZoneStage {
-      background: #151515 !important;
-      background-image: none !important;
-      border-color: #333 !important;
-    }
-
-    #emptyDropCard {
-      background: #fff !important;
-      border: 1px solid #ddd !important;
-      border-radius: 12px !important;
-      box-shadow: none !important;
-    }
-
-    .dark #emptyDropCard {
-      background: #1c1c1c !important;
-      border-color: #383838 !important;
-    }
-
-    #emptyDropCard > div:first-child {
-      background: transparent !important;
-      border: 0 !important;
-      color: #555 !important;
-    }
-
-    #previewCanvas {
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14) !important;
-    }
-
-    #dropZoneStage > div:last-child > div {
-      background: transparent !important;
-      border: 0 !important;
-      box-shadow: none !important;
-      backdrop-filter: none !important;
-    }
-
-    .quick-preset-btn {
-      border-radius: 5px !important;
-    }
-
-    .inspector-tab {
-      border-radius: 6px !important;
-      box-shadow: none !important;
-    }
-
-    .inspector-tab.bg-indigo-600 {
-      background: #eee !important;
-      color: #333 !important;
-    }
-
-    .dark .inspector-tab.bg-indigo-600 {
-      background: #303030 !important;
-      color: #f0f0f0 !important;
-    }
-
-    .inspector-section {
-      background: transparent !important;
-      border: 0 !important;
-      border-bottom: 1px solid #e5e5e5 !important;
-      border-radius: 0 !important;
-      overflow: visible !important;
-    }
-
-    .dark .inspector-section {
-      border-bottom-color: #333 !important;
-    }
-
-    .inspector-section .accordion-trigger {
-      border-radius: 0 !important;
-    }
-
-    .inspector-section [data-lucide] {
-      color: #666 !important;
-    }
-
-    .inspector-section [data-lucide="chevron-down"] {
-      color: #888 !important;
-    }
-
-    .inspector-section input[type="text"] {
-      background: #fff !important;
-      border-color: #ddd !important;
-      border-radius: 6px !important;
-      box-shadow: none !important;
-    }
-
-    .dark .inspector-section input[type="text"] {
-      background: #171717 !important;
-      border-color: #383838 !important;
-    }
-
-    .inspector-section input[type="text"]:focus {
-      border-color: #666 !important;
-    }
-
-    .preset-card {
-      border-radius: 8px !important;
-      box-shadow: none !important;
-    }
-
-    .inspector-section label.flex.items-center.justify-between {
-      border-radius: 6px !important;
-      box-shadow: none !important;
-    }
-
-    #btnDownloadPng,
-    #btnShareImage,
-    #btnResetMetadata,
-    #btnResetStyle {
-      box-shadow: none !important;
-      border-radius: 7px !important;
-    }
-
-    #btnDownloadPng {
-      background: #f1f1f1 !important;
-      color: #333 !important;
-      border-color: #ddd !important;
-    }
-
-    #btnShareImage {
-      background: #444 !important;
-    }
-
-    .dark #btnDownloadPng {
-      background: #282828 !important;
-      color: #eee !important;
-      border-color: #383838 !important;
-    }
-
-    .dark .inspector-section label.flex.items-center.justify-between {
-      background: #171717 !important;
-      border-color: #383838 !important;
-    }
-
-    .dark .quick-preset-btn {
-      color: #bbb !important;
-    }
-
-    .dark .quick-preset-btn.bg-indigo-600 {
-      background: #303030 !important;
-      color: #f0f0f0 !important;
-    }
-
-    .quick-preset-btn.bg-indigo-600 {
-      background: #eee !important;
-      color: #333 !important;
-    }
-
-    .inspector-section [class*="text-indigo-"] {
-      color: #555 !important;
-    }
-
-    .preset-card.border-indigo-500 {
-      background: #f4f4f4 !important;
-      border-color: #999 !important;
-    }
-
-    .dark .preset-card.border-indigo-500 {
-      background: #262626 !important;
-      border-color: #777 !important;
-    }
-
-    #formatBadge {
-      background: #eee !important;
-      border-color: #d5d5d5 !important;
-      color: #333 !important;
-      backdrop-filter: none !important;
-    }
-
-    .dark #formatBadge {
-      background: #303030 !important;
-      border-color: #414141 !important;
-      color: #f0f0f0 !important;
-    }
-
-    input[type="range"].studio-slider {
-      background: #d4d4d4 !important;
-    }
-
-    .dark input[type="range"].studio-slider {
-      background: #424242 !important;
-    }
-
-    input[type="range"].studio-slider::-webkit-slider-thumb {
-      background: #555 !important;
-      border-color: #fff !important;
-      box-shadow: none !important;
-    }
-
-    input[type="range"].studio-slider::-moz-range-thumb {
-      background: #555 !important;
-      border-color: #fff !important;
-    }
-
-    input[type="checkbox"] {
-      accent-color: #555 !important;
-    }
-
-    #iconSun,
-    #iconMoon {
-      color: #555 !important;
-    }
-
-    header span[title] {
-      background: #f0f0f0 !important;
-      border-color: #dedede !important;
-      color: #555 !important;
-    }
-
-    #dragOverlay {
-      background: rgba(25, 25, 25, 0.88) !important;
-      border-color: #aaa !important;
-    }
-
-    #heicLoadingOverlay {
-      border-color: #ccc !important;
-    }
-
-    #heicLoadingOverlay > div {
-      border-color: #ccc !important;
-      border-top-color: #555 !important;
-    }
-
-    #exifStatusBadge .animate-pulse {
-      animation: none !important;
-    }
-
-    .bg-emerald-400,
-    .bg-emerald-500,
-    .bg-indigo-400,
-    .bg-indigo-500,
-    .bg-amber-400 {
-      background-color: #777 !important;
-    }
-
-    .text-emerald-400,
-    .text-emerald-700,
-    .text-amber-300,
-    .text-amber-400,
-    .text-amber-500,
-    .text-indigo-300,
-    .text-indigo-400,
-    .text-indigo-500,
-    .text-indigo-600 {
-      color: #666 !important;
-    }
-
-    body [class*="bg-indigo-"],
-    body [class*="bg-emerald-"],
-    body [class*="bg-amber-"],
-    body [class*="bg-rose-"],
-    body [class*="bg-sky-"] {
-      background-color: #eee !important;
-    }
-
-    .dark [class*="bg-indigo-"],
-    .dark [class*="bg-emerald-"],
-    .dark [class*="bg-amber-"],
-    .dark [class*="bg-rose-"],
-    .dark [class*="bg-sky-"] {
-      background-color: #303030 !important;
-    }
-
-    body [class*="text-indigo-"],
-    body [class*="text-emerald-"],
-    body [class*="text-amber-"],
-    body [class*="text-rose-"],
-    body [class*="text-sky-"] {
-      color: #666 !important;
-    }
-
-    .dark [class*="text-indigo-"],
-    .dark [class*="text-emerald-"],
-    .dark [class*="text-amber-"],
-    .dark [class*="text-rose-"],
-    .dark [class*="text-sky-"] {
-      color: #bbb !important;
-    }
-
-    body [class*="border-indigo-"],
-    body [class*="border-emerald-"],
-    body [class*="border-amber-"],
-    body [class*="border-rose-"],
-    body [class*="border-sky-"] {
-      border-color: #d5d5d5 !important;
-    }
-
-    .dark [class*="border-indigo-"],
-    .dark [class*="border-emerald-"],
-    .dark [class*="border-amber-"],
-    .dark [class*="border-rose-"],
-    .dark [class*="border-sky-"] {
-      border-color: #444 !important;
-    }
-
-    [class*="shadow-indigo-"],
-    [class*="shadow-emerald-"] {
-      box-shadow: none !important;
-    }
-
-    body [class*="bg-slate-"] {
-      background-color: #f0f0f0 !important;
-    }
-
-    .dark [class*="bg-slate-"] {
-      background-color: #292929 !important;
-    }
-
-    body [class*="text-slate-"] {
-      color: #555 !important;
-    }
-
-    .dark [class*="text-slate-"] {
-      color: #bdbdbd !important;
-    }
-
-    body [class*="border-slate-"] {
-      border-color: #ddd !important;
-    }
-
-    .dark [class*="border-slate-"] {
-      border-color: #3a3a3a !important;
-    }
-
-    [class*="placeholder-slate-"]::placeholder {
-      color: #999 !important;
-    }
-
-    ::selection {
-      background: #d4d4d4 !important;
-      color: #111 !important;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: #f0f0f0 !important;
-    }
-
-    .dark ::-webkit-scrollbar-track {
-      background: #1a1a1a !important;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: #bdbdbd !important;
-    }
-
-    .dark ::-webkit-scrollbar-thumb {
-      background: #555 !important;
-    }
-  </style>
 </head>
 <body class="bg-slate-50 dark:bg-[#0B0D10] text-slate-900 dark:text-slate-100 font-sans antialiased selection:bg-indigo-500/30 selection:text-indigo-700 dark:selection:text-indigo-200 overflow-x-hidden transition-colors duration-200">
 
@@ -608,7 +200,7 @@
     <!-- Left / Center: Sticky Mobile (56vh) & Desktop Preview Canvas Stage -->
     <section
       id="dropZoneStage"
-      class="relative lg:static z-20 h-[56vh] lg:h-auto lg:max-h-none flex-1 studio-grid-bg backdrop-blur-md border-b border-slate-200 dark:border-[#262B36] lg:border-b-0 flex flex-col justify-between p-2.5 sm:p-4 lg:p-8 overflow-hidden select-none transition-colors duration-200"
+      class="relative lg:static z-20 h-[56vh] lg:h-auto lg:max-h-none flex-1 backdrop-blur-md border-b border-slate-200 dark:border-[#262B36] lg:border-b-0 flex flex-col justify-between p-2.5 sm:p-4 lg:p-8 overflow-hidden select-none transition-colors duration-200"
     >
       <!-- Top Status Telemetry Bar -->
       <div class="relative z-10 flex flex-wrap items-center justify-between gap-1.5 mb-2 min-w-0">
@@ -718,7 +310,7 @@
 
       <!-- Inspector Section Filter Tabs -->
       <div class="sticky top-0 z-30 bg-white/95 dark:bg-[#14171D]/95 backdrop-blur-md border-b border-slate-200 dark:border-[#262B36] px-4 py-2.5 flex items-center gap-1 overflow-x-auto shadow-sm">
-        <button type="button" data-tab="all" class="inspector-tab active px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition cursor-pointer">All</button>
+        <button type="button" data-tab="all" class="inspector-tab is-active px-2.5 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer">All</button>
         <button type="button" data-tab="presets" class="inspector-tab px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1E232D] transition cursor-pointer">Presets</button>
         <button type="button" data-tab="exif" class="inspector-tab px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1E232D] transition cursor-pointer">EXIF Data</button>
         <button type="button" data-tab="style" class="inspector-tab px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1E232D] transition cursor-pointer">Frame Style</button>
@@ -733,7 +325,7 @@
           <button type="button" class="accordion-trigger w-full px-4 py-3 flex items-center justify-between text-left hover:bg-slate-100 dark:hover:bg-[#202530] transition cursor-pointer">
             <div class="flex items-center gap-2">
               <i data-lucide="layout-template" class="w-4 h-4 text-indigo-500 dark:text-indigo-400"></i>
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">Frame Presets &amp; Ratio</span>
+              <span class="text-[13px] font-semibold text-slate-800 dark:text-slate-200">Frame Presets &amp; Ratio</span>
             </div>
             <i data-lucide="chevron-down" class="accordion-chevron w-4 h-4 text-slate-500 dark:text-slate-400 transition-transform duration-200"></i>
           </button>
@@ -754,7 +346,7 @@
               <!-- Classic White -->
               <button type="button" data-preset="classic" class="preset-card group flex items-center justify-between p-2.5 rounded-xl border text-left transition cursor-pointer">
                 <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-lg bg-white border border-slate-300 flex flex-col justify-between p-1 shrink-0">
+                  <div class="swatch w-9 h-9 rounded-lg bg-white border border-slate-300 flex flex-col justify-between p-1 shrink-0">
                     <div class="w-full h-5 bg-slate-800 rounded-[2px]"></div>
                     <div class="flex justify-between items-center px-0.5">
                       <span class="w-3 h-0.5 bg-slate-900"></span>
@@ -772,7 +364,7 @@
               <!-- Darkroom Matte -->
               <button type="button" data-preset="darkroom" class="preset-card group flex items-center justify-between p-2.5 rounded-xl border text-left transition cursor-pointer">
                 <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-lg bg-[#111113] border border-neutral-700 flex flex-col justify-between p-1 shrink-0">
+                  <div class="swatch w-9 h-9 rounded-lg bg-[#111113] border border-neutral-700 flex flex-col justify-between p-1 shrink-0">
                     <div class="w-full h-5 bg-neutral-700 rounded-[2px]"></div>
                     <div class="flex justify-between items-center px-0.5">
                       <span class="w-3 h-0.5 bg-white"></span>
@@ -790,7 +382,7 @@
               <!-- Leica Minimal -->
               <button type="button" data-preset="leica" class="preset-card group flex items-center justify-between p-2.5 rounded-xl border text-left transition cursor-pointer">
                 <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-lg bg-[#FAFAFA] border border-slate-300 flex flex-col justify-between p-1 shrink-0">
+                  <div class="swatch w-9 h-9 rounded-lg bg-[#FAFAFA] border border-slate-300 flex flex-col justify-between p-1 shrink-0">
                     <div class="w-full h-5 bg-zinc-800 rounded-[2px]"></div>
                     <div class="flex items-center gap-1 px-0.5">
                       <span class="w-1.5 h-1.5 rounded-full bg-red-600"></span>
@@ -808,7 +400,7 @@
               <!-- Blur Backdrop -->
               <button type="button" data-preset="blur" class="preset-card group flex items-center justify-between p-2.5 rounded-xl border text-left transition cursor-pointer">
                 <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-900 via-slate-800 to-amber-900 border border-slate-600 flex flex-col justify-between p-1.5 shrink-0">
+                  <div class="swatch w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-900 via-slate-800 to-amber-900 border border-slate-600 flex flex-col justify-between p-1.5 shrink-0">
                     <div class="w-full h-4 bg-slate-200/90 rounded-[2px] shadow"></div>
                     <div class="w-5 h-0.5 bg-white/80 mx-auto"></div>
                   </div>
@@ -823,7 +415,7 @@
               <!-- Retro Film -->
               <button type="button" data-preset="retro" class="preset-card group flex items-center justify-between p-2.5 rounded-xl border text-left transition cursor-pointer">
                 <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-lg bg-[#F6F3EB] border border-stone-300 flex flex-col justify-between p-1 pb-1.5 shrink-0">
+                  <div class="swatch w-9 h-9 rounded-lg bg-[#F6F3EB] border border-stone-300 flex flex-col justify-between p-1 pb-1.5 shrink-0">
                     <div class="w-full h-4 bg-stone-700 rounded-[1px]"></div>
                     <div class="w-4 h-0.5 bg-stone-600 mx-auto"></div>
                   </div>
@@ -843,7 +435,7 @@
           <div class="px-4 py-3 flex items-center justify-between hover:bg-slate-100 dark:hover:bg-[#202530] transition">
             <button type="button" class="accordion-trigger flex-1 flex items-center gap-2 text-left cursor-pointer">
               <i data-lucide="camera" class="w-4 h-4 text-amber-500 dark:text-amber-400"></i>
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">EXIF Metadata</span>
+              <span class="text-[13px] font-semibold text-slate-800 dark:text-slate-200">EXIF Metadata</span>
             </button>
             <div class="flex items-center gap-2">
                 <button
@@ -949,7 +541,7 @@
           <div class="px-4 py-3 flex items-center justify-between hover:bg-slate-100 dark:hover:bg-[#202530] transition">
             <button type="button" class="accordion-trigger flex-1 flex items-center gap-2 text-left cursor-pointer">
               <i data-lucide="sliders-horizontal" class="w-4 h-4 text-indigo-500 dark:text-indigo-400"></i>
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">Frame &amp; Typography</span>
+              <span class="text-[13px] font-semibold text-slate-800 dark:text-slate-200">Frame &amp; Typography</span>
             </button>
             <div class="flex items-center gap-2">
                 <button
@@ -1036,6 +628,14 @@
                 <span class="text-xs text-slate-700 dark:text-slate-300">Drop Shadow</span>
                 <input id="toggleDropShadow" type="checkbox" class="accent-indigo-500 w-4 h-4 rounded cursor-pointer" />
               </label>
+              <label class="flex items-center justify-between p-2.5 rounded-lg bg-white dark:bg-[#0F1217] border border-slate-200 dark:border-[#262B36] cursor-pointer hover:border-slate-400 dark:hover:border-slate-600 transition">
+                <span class="text-xs text-slate-700 dark:text-slate-300">Brand Mark</span>
+                <input id="toggleBrand" type="checkbox" checked class="accent-indigo-500 w-4 h-4 rounded cursor-pointer" />
+              </label>
+              <label class="flex items-center justify-between p-2.5 rounded-lg bg-white dark:bg-[#0F1217] border border-slate-200 dark:border-[#262B36] cursor-pointer hover:border-slate-400 dark:hover:border-slate-600 transition">
+                <span class="text-xs text-slate-700 dark:text-slate-300">Exposure</span>
+                <input id="toggleExposure" type="checkbox" checked class="accent-indigo-500 w-4 h-4 rounded cursor-pointer" />
+              </label>
             </div>
           </div>
         </div>
@@ -1045,7 +645,7 @@
           <button type="button" class="accordion-trigger w-full px-4 py-3 flex items-center justify-between text-left hover:bg-slate-100 dark:hover:bg-[#202530] transition cursor-pointer">
             <div class="flex items-center gap-2">
               <i data-lucide="download" class="w-4 h-4 text-emerald-500 dark:text-emerald-400"></i>
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">Export &amp; Share</span>
+              <span class="text-[13px] font-semibold text-slate-800 dark:text-slate-200">Export &amp; Share</span>
             </div>
             <i data-lucide="chevron-down" class="accordion-chevron w-4 h-4 text-slate-500 dark:text-slate-400 transition-transform duration-200"></i>
           </button>
@@ -1089,7 +689,7 @@
         </div>
 
         <!-- Small non-intrusive project support link -->
-        <div class="rounded-xl bg-amber-50/80 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-500/20 p-3">
+        <div class="support-link p-2">
           <a
             href="https://saweria.co/aksa30"
             target="_blank"
@@ -1140,7 +740,9 @@
           showDate: true,
           showLocation: true,
           showAccentDot: true,
-          dropShadow: false
+          dropShadow: false,
+          showBrand: true,
+          showExposure: true
         };
 
         // Application State
@@ -1251,7 +853,9 @@
           toggleShowDate: document.getElementById('toggleShowDate'),
           toggleLocation: document.getElementById('toggleLocation'),
           toggleAccentDot: document.getElementById('toggleAccentDot'),
-          toggleDropShadow: document.getElementById('toggleDropShadow')
+          toggleDropShadow: document.getElementById('toggleDropShadow'),
+          toggleBrand: document.getElementById('toggleBrand'),
+          toggleExposure: document.getElementById('toggleExposure')
         };
 
         let renderRafId = null;
@@ -1275,16 +879,16 @@
             el.iconMoon.classList.toggle('hidden', isDark);
           }
           try {
-            localStorage.setItem('framex-theme', mode);
+            localStorage.setItem('framex-theme-v2', mode);
           } catch (_) {
             // Ignore storage errors in restricted contexts
           }
         }
 
         function initTheme() {
-          let savedTheme = 'light';
+          let savedTheme = 'dark';
           try {
-            const stored = localStorage.getItem('framex-theme');
+            const stored = localStorage.getItem('framex-theme-v2');
             if (stored === 'light' || stored === 'dark') {
               savedTheme = stored;
             }
@@ -1396,65 +1000,19 @@
           el.toggleLocation.checked = state.style.showLocation;
           el.toggleAccentDot.checked = state.style.showAccentDot;
           el.toggleDropShadow.checked = state.style.dropShadow;
+          el.toggleBrand.checked = state.style.showBrand;
+          el.toggleExposure.checked = state.style.showExposure;
 
-          // Update Preset Cards
+          // Active states
           document.querySelectorAll('.preset-card').forEach(card => {
             const active = card.dataset.preset === state.preset;
-            card.classList.toggle('border-indigo-500', active);
-            card.classList.toggle('bg-indigo-500/10', active);
-            card.classList.toggle('border-slate-200', !active);
-            card.classList.toggle('dark:border-[#262B36]', !active);
-            card.classList.toggle('bg-white', !active);
-            card.classList.toggle('dark:bg-[#12151C]', !active);
-
+            card.classList.toggle('is-active', active);
             const check = card.querySelector('.preset-check');
-            if (check) {
-              check.classList.toggle('border-indigo-400', active);
-              check.classList.toggle('bg-indigo-500', active);
-              check.innerHTML = active ? '<span class="w-1.5 h-1.5 rounded-full bg-white"></span>' : '';
-            }
+            if (check) check.innerHTML = active ? '<span class="w-1.5 h-1.5 rounded-full"></span>' : '';
           });
-
-          // Update Quick Preset Pills
-          document.querySelectorAll('.quick-preset-btn').forEach(btn => {
-            const active = btn.dataset.quickPreset === state.preset;
-            btn.classList.toggle('bg-indigo-600', active);
-            btn.classList.toggle('text-white', active);
-            btn.classList.toggle('text-slate-600', !active);
-            btn.classList.toggle('dark:text-slate-400', !active);
-            btn.classList.toggle('hover:text-slate-900', !active);
-            btn.classList.toggle('dark:hover:text-white', !active);
-          });
-
-          // Update Aspect Ratio Buttons
-          document.querySelectorAll('.ratio-btn').forEach(btn => {
-            const active = btn.dataset.ratio === state.aspectRatio;
-            btn.classList.toggle('border-indigo-500', active);
-            btn.classList.toggle('bg-indigo-500/15', active);
-            btn.classList.toggle('text-indigo-700', active);
-            btn.classList.toggle('dark:text-white', active);
-            btn.classList.toggle('border-slate-200', !active);
-            btn.classList.toggle('dark:border-[#262B36]', !active);
-            btn.classList.toggle('bg-white', !active);
-            btn.classList.toggle('dark:bg-[#0F1217]', !active);
-            btn.classList.toggle('text-slate-600', !active);
-            btn.classList.toggle('dark:text-slate-400', !active);
-          });
-
-          // Update Font Buttons
-          document.querySelectorAll('.font-btn').forEach(btn => {
-            const active = btn.dataset.font === state.style.fontFamily;
-            btn.classList.toggle('border-indigo-500', active);
-            btn.classList.toggle('bg-indigo-500/15', active);
-            btn.classList.toggle('text-indigo-700', active);
-            btn.classList.toggle('dark:text-white', active);
-            btn.classList.toggle('border-slate-200', !active);
-            btn.classList.toggle('dark:border-[#262B36]', !active);
-            btn.classList.toggle('bg-white', !active);
-            btn.classList.toggle('dark:bg-[#0F1217]', !active);
-            btn.classList.toggle('text-slate-600', !active);
-            btn.classList.toggle('dark:text-slate-400', !active);
-          });
+          document.querySelectorAll('.quick-preset-btn').forEach(btn => btn.classList.toggle('is-active', btn.dataset.quickPreset === state.preset));
+          document.querySelectorAll('.ratio-btn').forEach(btn => btn.classList.toggle('is-active', btn.dataset.ratio === state.aspectRatio));
+          document.querySelectorAll('.font-btn').forEach(btn => btn.classList.toggle('is-active', btn.dataset.font === state.style.fontFamily));
         }
 
         /**
@@ -2023,7 +1581,7 @@
           const cameraText = (state.metadata.camera || '').trim();
           const lensLine = (state.metadata.lensFocal || '').trim();
 
-          const exposureParts = [state.metadata.aperture, state.metadata.shutter, state.metadata.iso]
+          const exposureParts = (state.style.showExposure ? [state.metadata.aperture, state.metadata.shutter, state.metadata.iso] : [])
             .map(s => (s || '').trim())
             .filter(Boolean);
           const exposureLine = exposureParts.join('   ');
@@ -2117,7 +1675,7 @@
             if (cameraText && lensLine) {
               ctx.font = leftPrimaryFont;
               ctx.fillStyle = presetCfg.textPrimary;
-              ctx.fillText(fitTextWithEllipsis(ctx, cameraText, leftMaxW), textStartX, footerCenterY - primarySize * 0.58);
+              drawCameraLine(ctx, cameraText, textStartX, footerCenterY - primarySize * 0.58, leftMaxW, primarySize, fontName, presetCfg.textPrimary);
 
               ctx.font = leftSecondaryFont;
               ctx.fillStyle = presetCfg.textSecondary;
@@ -2125,7 +1683,11 @@
             } else if (cameraText || lensLine) {
               ctx.font = leftPrimaryFont;
               ctx.fillStyle = presetCfg.textPrimary;
-              ctx.fillText(fitTextWithEllipsis(ctx, cameraText || lensLine, leftMaxW), textStartX, footerCenterY);
+              if (cameraText) {
+                drawCameraLine(ctx, cameraText, textStartX, footerCenterY, leftMaxW, primarySize, fontName, presetCfg.textPrimary);
+              } else {
+                ctx.fillText(fitTextWithEllipsis(ctx, lensLine, leftMaxW), textStartX, footerCenterY);
+              }
             }
 
             // Right Block
@@ -2156,7 +1718,79 @@
         /**
          * Debounced preview render via requestAnimationFrame
          */
+        const BRANDS = ['FUJIFILM', 'SONY', 'CANON', 'NIKON', 'LEICA', 'PANASONIC', 'OM SYSTEM', 'OLYMPUS', 'RICOH', 'PENTAX', 'HASSELBLAD', 'SIGMA', 'APPLE', 'SAMSUNG', 'XIAOMI', 'GOOGLE', 'HUAWEI', 'OPPO', 'VIVO', 'REALME', 'ONEPLUS', 'DJI', 'GOPRO'];
+
+        /**
+         * Split "FUJIFILM X100VI" into brand + model when the brand is known
+         */
+        function splitBrand(text) {
+          const up = text.toUpperCase();
+          for (const b of BRANDS) {
+            if (up.startsWith(b + ' ')) return [b, text.slice(b.length).trim()];
+          }
+          return null;
+        }
+
+        /**
+         * Draw the camera line with the brand name emphasised (text only, no logo assets)
+         */
+        function drawCameraLine(ctx, text, x, y, maxW, size, fontName, color) {
+          const parts = state.style.showBrand ? splitBrand(text) : null;
+          if (!parts || !parts[1]) {
+            ctx.font = `700 ${size}px "${fontName}", sans-serif`;
+            ctx.fillStyle = color;
+            ctx.fillText(fitTextWithEllipsis(ctx, text, maxW), x, y);
+            return;
+          }
+          ctx.fillStyle = color;
+          ctx.font = `800 ${size}px "${fontName}", sans-serif`;
+          const brandW = ctx.measureText(parts[0]).width + size * 0.5;
+          if (brandW >= maxW * 0.85) {
+            ctx.fillText(fitTextWithEllipsis(ctx, text, maxW), x, y);
+            return;
+          }
+          ctx.fillText(parts[0], x, y);
+          ctx.font = `400 ${size}px "${fontName}", sans-serif`;
+          ctx.fillText(fitTextWithEllipsis(ctx, parts[1], maxW - brandW), x + brandW, y);
+        }
+
+        /**
+         * Remember frame style between visits (never stores EXIF or photos)
+         */
+        const SETTINGS_KEY = 'framex-settings-v1';
+        const clampNum = (v, lo, hi, fb) => (typeof v === 'number' && isFinite(v) ? Math.min(hi, Math.max(lo, v)) : fb);
+        function loadSettings() {
+          try {
+            const raw = localStorage.getItem(SETTINGS_KEY);
+            if (!raw) return;
+            const s = JSON.parse(raw);
+            if (PRESETS[s.preset]) state.preset = s.preset;
+            if (['auto', '4:5', '1:1', '16:9'].includes(s.aspectRatio)) state.aspectRatio = s.aspectRatio;
+            if (s.style && typeof s.style === 'object') {
+              Object.keys(DEFAULT_STYLE).forEach(k => {
+                if (typeof s.style[k] === typeof DEFAULT_STYLE[k]) state.style[k] = s.style[k];
+              });
+              state.style.padding = clampNum(state.style.padding, 0.5, 2, DEFAULT_STYLE.padding);
+              state.style.cornerRadius = clampNum(state.style.cornerRadius, 0, 28, DEFAULT_STYLE.cornerRadius);
+              state.style.fontScale = clampNum(state.style.fontScale, 0.75, 1.4, DEFAULT_STYLE.fontScale);
+              if (!['Inter', 'JetBrains Mono', 'Playfair Display'].includes(state.style.fontFamily)) {
+                state.style.fontFamily = DEFAULT_STYLE.fontFamily;
+              }
+            }
+          } catch (_) { /* storage unavailable or corrupt: keep defaults */ }
+        }
+        let saveTimer = null;
+        function queueSave() {
+          clearTimeout(saveTimer);
+          saveTimer = setTimeout(() => {
+            try {
+              localStorage.setItem(SETTINGS_KEY, JSON.stringify({ preset: state.preset, aspectRatio: state.aspectRatio, style: state.style }));
+            } catch (_) { /* ignore */ }
+          }, 300);
+        }
+
         function scheduleRender() {
+          queueSave();
           if (!state.image) return;
           if (renderRafId) {
             cancelAnimationFrame(renderRafId);
@@ -2391,18 +2025,21 @@
             scheduleRender();
           });
 
+          el.toggleBrand.addEventListener('change', () => {
+            state.style.showBrand = el.toggleBrand.checked;
+            scheduleRender();
+          });
+          el.toggleExposure.addEventListener('change', () => {
+            state.style.showExposure = el.toggleExposure.checked;
+            scheduleRender();
+          });
+
           // Inspector Filter Tabs
           document.querySelectorAll('.inspector-tab').forEach(tab => {
             tab.addEventListener('click', () => {
               const target = tab.dataset.tab;
               document.querySelectorAll('.inspector-tab').forEach(t => {
-                const isActive = t === tab;
-                t.classList.toggle('bg-indigo-600', isActive);
-                t.classList.toggle('text-white', isActive);
-                t.classList.toggle('font-semibold', isActive);
-                t.classList.toggle('text-slate-600', !isActive);
-                t.classList.toggle('dark:text-slate-400', !isActive);
-                t.classList.toggle('font-medium', !isActive);
+                t.classList.toggle('is-active', t === tab);
               });
 
               document.querySelectorAll('.inspector-section').forEach(sec => {
@@ -2432,6 +2069,7 @@
         }
 
         // Initial Boot
+        loadSettings();
         initTheme();
         updateExifBadge();
         syncInputsFromState();
