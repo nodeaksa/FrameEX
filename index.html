@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -132,6 +132,412 @@
       }
     }
   </style>
+  <style>
+    body {
+      background: #f7f7f5 !important;
+      color: #242424 !important;
+    }
+
+    .dark body {
+      background: #171717 !important;
+      color: #ececec !important;
+    }
+
+    header {
+      background: #fff !important;
+      border-color: #e6e6e6 !important;
+      backdrop-filter: none !important;
+    }
+
+    .dark header {
+      background: #1c1c1c !important;
+      border-color: #333 !important;
+    }
+
+    header > div:first-child > div:first-child {
+      background: #333 !important;
+      background-image: none !important;
+      border-radius: 9px !important;
+      box-shadow: none !important;
+    }
+
+    #btnThemeToggle,
+    #btnSampleHeader {
+      background: transparent !important;
+      border-color: transparent !important;
+      box-shadow: none !important;
+    }
+
+    #btnUploadHeader,
+    #btnUploadEmpty,
+    #btnDownloadJpg {
+      background: #222 !important;
+      color: #fff !important;
+      border-color: #222 !important;
+      box-shadow: none !important;
+    }
+
+    #btnUploadHeader:hover,
+    #btnUploadEmpty:hover,
+    #btnDownloadJpg:hover {
+      background: #000 !important;
+    }
+
+    #dropZoneStage {
+      background: #f1f1f1 !important;
+      background-image: none !important;
+      border-color: #ddd !important;
+      backdrop-filter: none !important;
+    }
+
+    .dark #dropZoneStage {
+      background: #151515 !important;
+      background-image: none !important;
+      border-color: #333 !important;
+    }
+
+    #emptyDropCard {
+      background: #fff !important;
+      border: 1px solid #ddd !important;
+      border-radius: 12px !important;
+      box-shadow: none !important;
+    }
+
+    .dark #emptyDropCard {
+      background: #1c1c1c !important;
+      border-color: #383838 !important;
+    }
+
+    #emptyDropCard > div:first-child {
+      background: transparent !important;
+      border: 0 !important;
+      color: #555 !important;
+    }
+
+    #previewCanvas {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14) !important;
+    }
+
+    #dropZoneStage > div:last-child > div {
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+    }
+
+    .quick-preset-btn {
+      border-radius: 5px !important;
+    }
+
+    .inspector-tab {
+      border-radius: 6px !important;
+      box-shadow: none !important;
+    }
+
+    .inspector-tab.bg-indigo-600 {
+      background: #eee !important;
+      color: #333 !important;
+    }
+
+    .dark .inspector-tab.bg-indigo-600 {
+      background: #303030 !important;
+      color: #f0f0f0 !important;
+    }
+
+    .inspector-section {
+      background: transparent !important;
+      border: 0 !important;
+      border-bottom: 1px solid #e5e5e5 !important;
+      border-radius: 0 !important;
+      overflow: visible !important;
+    }
+
+    .dark .inspector-section {
+      border-bottom-color: #333 !important;
+    }
+
+    .inspector-section .accordion-trigger {
+      border-radius: 0 !important;
+    }
+
+    .inspector-section [data-lucide] {
+      color: #666 !important;
+    }
+
+    .inspector-section [data-lucide="chevron-down"] {
+      color: #888 !important;
+    }
+
+    .inspector-section input[type="text"] {
+      background: #fff !important;
+      border-color: #ddd !important;
+      border-radius: 6px !important;
+      box-shadow: none !important;
+    }
+
+    .dark .inspector-section input[type="text"] {
+      background: #171717 !important;
+      border-color: #383838 !important;
+    }
+
+    .inspector-section input[type="text"]:focus {
+      border-color: #666 !important;
+    }
+
+    .preset-card {
+      border-radius: 8px !important;
+      box-shadow: none !important;
+    }
+
+    .inspector-section label.flex.items-center.justify-between {
+      border-radius: 6px !important;
+      box-shadow: none !important;
+    }
+
+    #btnDownloadPng,
+    #btnShareImage,
+    #btnResetMetadata,
+    #btnResetStyle {
+      box-shadow: none !important;
+      border-radius: 7px !important;
+    }
+
+    #btnDownloadPng {
+      background: #f1f1f1 !important;
+      color: #333 !important;
+      border-color: #ddd !important;
+    }
+
+    #btnShareImage {
+      background: #444 !important;
+    }
+
+    .dark #btnDownloadPng {
+      background: #282828 !important;
+      color: #eee !important;
+      border-color: #383838 !important;
+    }
+
+    .dark .inspector-section label.flex.items-center.justify-between {
+      background: #171717 !important;
+      border-color: #383838 !important;
+    }
+
+    .dark .quick-preset-btn {
+      color: #bbb !important;
+    }
+
+    .dark .quick-preset-btn.bg-indigo-600 {
+      background: #303030 !important;
+      color: #f0f0f0 !important;
+    }
+
+    .quick-preset-btn.bg-indigo-600 {
+      background: #eee !important;
+      color: #333 !important;
+    }
+
+    .inspector-section [class*="text-indigo-"] {
+      color: #555 !important;
+    }
+
+    .preset-card.border-indigo-500 {
+      background: #f4f4f4 !important;
+      border-color: #999 !important;
+    }
+
+    .dark .preset-card.border-indigo-500 {
+      background: #262626 !important;
+      border-color: #777 !important;
+    }
+
+    #formatBadge {
+      background: #eee !important;
+      border-color: #d5d5d5 !important;
+      color: #333 !important;
+      backdrop-filter: none !important;
+    }
+
+    .dark #formatBadge {
+      background: #303030 !important;
+      border-color: #414141 !important;
+      color: #f0f0f0 !important;
+    }
+
+    input[type="range"].studio-slider {
+      background: #d4d4d4 !important;
+    }
+
+    .dark input[type="range"].studio-slider {
+      background: #424242 !important;
+    }
+
+    input[type="range"].studio-slider::-webkit-slider-thumb {
+      background: #555 !important;
+      border-color: #fff !important;
+      box-shadow: none !important;
+    }
+
+    input[type="range"].studio-slider::-moz-range-thumb {
+      background: #555 !important;
+      border-color: #fff !important;
+    }
+
+    input[type="checkbox"] {
+      accent-color: #555 !important;
+    }
+
+    #iconSun,
+    #iconMoon {
+      color: #555 !important;
+    }
+
+    header span[title] {
+      background: #f0f0f0 !important;
+      border-color: #dedede !important;
+      color: #555 !important;
+    }
+
+    #dragOverlay {
+      background: rgba(25, 25, 25, 0.88) !important;
+      border-color: #aaa !important;
+    }
+
+    #heicLoadingOverlay {
+      border-color: #ccc !important;
+    }
+
+    #heicLoadingOverlay > div {
+      border-color: #ccc !important;
+      border-top-color: #555 !important;
+    }
+
+    #exifStatusBadge .animate-pulse {
+      animation: none !important;
+    }
+
+    .bg-emerald-400,
+    .bg-emerald-500,
+    .bg-indigo-400,
+    .bg-indigo-500,
+    .bg-amber-400 {
+      background-color: #777 !important;
+    }
+
+    .text-emerald-400,
+    .text-emerald-700,
+    .text-amber-300,
+    .text-amber-400,
+    .text-amber-500,
+    .text-indigo-300,
+    .text-indigo-400,
+    .text-indigo-500,
+    .text-indigo-600 {
+      color: #666 !important;
+    }
+
+    body [class*="bg-indigo-"],
+    body [class*="bg-emerald-"],
+    body [class*="bg-amber-"],
+    body [class*="bg-rose-"],
+    body [class*="bg-sky-"] {
+      background-color: #eee !important;
+    }
+
+    .dark [class*="bg-indigo-"],
+    .dark [class*="bg-emerald-"],
+    .dark [class*="bg-amber-"],
+    .dark [class*="bg-rose-"],
+    .dark [class*="bg-sky-"] {
+      background-color: #303030 !important;
+    }
+
+    body [class*="text-indigo-"],
+    body [class*="text-emerald-"],
+    body [class*="text-amber-"],
+    body [class*="text-rose-"],
+    body [class*="text-sky-"] {
+      color: #666 !important;
+    }
+
+    .dark [class*="text-indigo-"],
+    .dark [class*="text-emerald-"],
+    .dark [class*="text-amber-"],
+    .dark [class*="text-rose-"],
+    .dark [class*="text-sky-"] {
+      color: #bbb !important;
+    }
+
+    body [class*="border-indigo-"],
+    body [class*="border-emerald-"],
+    body [class*="border-amber-"],
+    body [class*="border-rose-"],
+    body [class*="border-sky-"] {
+      border-color: #d5d5d5 !important;
+    }
+
+    .dark [class*="border-indigo-"],
+    .dark [class*="border-emerald-"],
+    .dark [class*="border-amber-"],
+    .dark [class*="border-rose-"],
+    .dark [class*="border-sky-"] {
+      border-color: #444 !important;
+    }
+
+    [class*="shadow-indigo-"],
+    [class*="shadow-emerald-"] {
+      box-shadow: none !important;
+    }
+
+    body [class*="bg-slate-"] {
+      background-color: #f0f0f0 !important;
+    }
+
+    .dark [class*="bg-slate-"] {
+      background-color: #292929 !important;
+    }
+
+    body [class*="text-slate-"] {
+      color: #555 !important;
+    }
+
+    .dark [class*="text-slate-"] {
+      color: #bdbdbd !important;
+    }
+
+    body [class*="border-slate-"] {
+      border-color: #ddd !important;
+    }
+
+    .dark [class*="border-slate-"] {
+      border-color: #3a3a3a !important;
+    }
+
+    [class*="placeholder-slate-"]::placeholder {
+      color: #999 !important;
+    }
+
+    ::selection {
+      background: #d4d4d4 !important;
+      color: #111 !important;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f0f0f0 !important;
+    }
+
+    .dark ::-webkit-scrollbar-track {
+      background: #1a1a1a !important;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #bdbdbd !important;
+    }
+
+    .dark ::-webkit-scrollbar-thumb {
+      background: #555 !important;
+    }
+  </style>
 </head>
 <body class="bg-slate-50 dark:bg-[#0B0D10] text-slate-900 dark:text-slate-100 font-sans antialiased selection:bg-indigo-500/30 selection:text-indigo-700 dark:selection:text-indigo-200 overflow-x-hidden transition-colors duration-200">
 
@@ -181,7 +587,7 @@
         class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 hover:bg-slate-200 dark:bg-[#1A1E26] dark:hover:bg-[#222732] text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-[#262B36] transition cursor-pointer"
         title="Load procedural sample landscape with realistic EXIF"
       >
-        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-500 dark:text-amber-400"></i>
+        <i data-lucide="image" class="w-3.5 h-3.5"></i>
         <span class="hidden sm:inline">Try Sample</span>
       </button>
 
@@ -237,9 +643,9 @@
           <div class="w-10 h-10 sm:w-14 sm:h-14 mx-auto mb-2.5 sm:mb-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
             <i data-lucide="image-plus" class="w-5 h-5 sm:w-7 sm:h-7"></i>
           </div>
-          <h2 class="text-sm sm:text-xl font-bold text-slate-900 dark:text-white mb-1 sm:mb-2">Drop your photograph here</h2>
+          <h2 class="text-sm sm:text-xl font-bold text-slate-900 dark:text-white mb-1 sm:mb-2">Drop a photo here</h2>
           <p class="hidden sm:block text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-sm mx-auto mb-5 leading-relaxed">
-            Extracts camera model, lens, focal length, aperture, shutter speed, ISO &amp; GPS coordinates locally inside your browser—including iPhone HEIC files.
+            Add a photo to create a frame with its camera details. Files stay on your device.
           </p>
 
           <div class="flex flex-row items-center justify-center gap-2 sm:gap-3 mt-2 sm:mt-0">
@@ -257,7 +663,7 @@
               type="button"
               class="inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium bg-slate-100 hover:bg-slate-200 dark:bg-[#1E232D] dark:hover:bg-[#262C38] text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-[#2F3646] transition cursor-pointer"
             >
-              <i data-lucide="sparkles" class="w-4 h-4 text-amber-500 dark:text-amber-400"></i>
+              <i data-lucide="image" class="w-4 h-4"></i>
               <span>Try Sample</span>
             </button>
           </div>
@@ -876,7 +1282,7 @@
         }
 
         function initTheme() {
-          let savedTheme = 'dark';
+          let savedTheme = 'light';
           try {
             const stored = localStorage.getItem('framex-theme');
             if (stored === 'light' || stored === 'dark') {
@@ -894,9 +1300,9 @@
         function showToast(message, type = 'info') {
           const palette = {
             info: 'bg-white/95 dark:bg-[#1A1E26] border-slate-200 dark:border-[#2E3646] text-slate-900 dark:text-slate-100',
-            success: 'bg-emerald-950/95 border-emerald-500/40 text-emerald-200',
-            warning: 'bg-amber-950/95 border-amber-500/40 text-amber-200',
-            error: 'bg-rose-950/95 border-rose-500/40 text-rose-200'
+            success: 'bg-neutral-900/95 border-neutral-600 text-neutral-100',
+            warning: 'bg-neutral-800/95 border-neutral-500 text-neutral-100',
+            error: 'bg-neutral-950/95 border-neutral-700 text-neutral-100'
           };
           const toast = document.createElement('div');
           toast.className = `px-4 py-2.5 rounded-xl border text-xs font-medium shadow-2xl backdrop-blur-md transition-all duration-300 opacity-0 translate-y-2 ${palette[type] || palette.info}`;
