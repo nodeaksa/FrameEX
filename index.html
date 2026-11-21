@@ -35,8 +35,8 @@
     };
   </script>
 <style>
-:root{--bg:#E9EDF5;--panel:#FFFFFF;--stage:#D3DAE7;--field:#F2F5FA;--ink:#0B1220;--muted:#46526A;--line:#B2BDD0;--accent:#1D4ED8;--accent-ink:#FFFFFF;--accent-soft:#DCE6FB;--warn:#8A5A00}
-.dark{--bg:#05080F;--panel:#0C121D;--stage:#030509;--field:#060A12;--ink:#F1F5FB;--muted:#9AA8C0;--line:#26344D;--accent:#5B9BFF;--accent-ink:#04101F;--accent-soft:#12223F;--warn:#E0B65C}
+:root{--bg:#F4F4F4;--panel:#FFFFFF;--stage:#E8E8E8;--field:#F8F8F8;--ink:#171717;--muted:#686868;--line:#D2D2D2;--accent:#262626;--accent-ink:#FFFFFF;--accent-soft:#E7E7E7;--warn:#626262}
+.dark{--bg:#0A0A0A;--panel:#141414;--stage:#080808;--field:#101010;--ink:#F3F3F3;--muted:#A3A3A3;--line:#303030;--accent:#E5E5E5;--accent-ink:#111111;--accent-soft:#292929;--warn:#B8B8B8}
 body{background:var(--bg)!important;color:var(--ink)!important;font-family:'Instrument Sans','Inter',system-ui,sans-serif}
 ::selection{background:var(--accent-soft);color:var(--ink)}
 button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -45,15 +45,15 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
 /* generic overrides for leftover utility colors */
 [class*="text-slate-"]:not(.swatch *){color:var(--muted)!important}
 [class*="text-slate-9"],[class*="text-slate-8"],[class*="dark:text-white"]{color:var(--ink)!important}
-[class*="text-indigo-"],[class*="text-emerald-"],[class*="text-amber-"]{color:var(--accent)!important}
+[class*="text-neutral-"],[class*="text-emerald-"],[class*="text-amber-"]{color:var(--accent)!important}
 p[class*="text-amber-"]{color:var(--warn)!important}
 [class*="border-slate-"]:not(.swatch),[class*="dark:border-["]:not(.swatch){border-color:var(--line)!important}
 .font-mono{letter-spacing:0}
 
 /* header */
 header{background:var(--panel)!important;border-color:var(--line)!important;backdrop-filter:none!important}
-header>div:first-child>div:first-child{background:var(--accent)!important;background-image:none!important;border-radius:8px!important;box-shadow:none!important}
-header>div:first-child>div:first-child svg{color:var(--accent-ink)!important}
+header>div:first-child>div:first-child{background:#FFFFFF!important;background-image:none!important;border:1px solid #262626!important;border-radius:8px!important;box-shadow:none!important;overflow:hidden!important}
+header>div:first-child>div:first-child svg{display:block;width:100%;height:100%}
 header span[title]{background:transparent!important;border:1px solid var(--line)!important;color:var(--muted)!important;font-family:inherit!important;border-radius:6px!important;font-size:11px!important}
 #btnThemeToggle,#btnSampleHeader{background:transparent!important;border-color:transparent!important;box-shadow:none!important}
 #btnThemeToggle:hover,#btnSampleHeader:hover{background:var(--accent-soft)!important}
@@ -75,17 +75,17 @@ header span[title]{background:transparent!important;border:1px solid var(--line)
 #formatBadge,#exifStatusBadge,#resolutionBadge{background:var(--panel)!important;border:1px solid var(--line)!important;color:var(--muted)!important;box-shadow:none!important;backdrop-filter:none!important}
 #formatBadge *,#resolutionBadge *{color:var(--muted)!important}
 #exifStatusBadge>span:first-child{background:var(--muted)!important;animation:none!important}
-#exifStatusBadge>span.bg-emerald-400,#exifStatusBadge>span.bg-indigo-400{background:var(--accent)!important}
-#exifStatusBadge>span.bg-amber-400{background:var(--warn)!important}
+#exifStatusBadge>span.bg-emerald-400,#exifStatusBadge>span.bg-neutral-400{background:var(--accent)!important}
+#exifStatusBadge>span.bg-neutral-300{background:var(--warn)!important}
 #dropZoneStage>div:last-child>div{background:var(--panel)!important;border:1px solid var(--line)!important;border-radius:10px!important;box-shadow:none!important;backdrop-filter:none!important}
 #previewCanvas{outline:1px solid var(--line);max-width:100%;max-height:41vh;width:auto;height:auto;object-fit:contain;border-radius:2px;box-shadow:0 12px 32px -12px rgba(0,0,0,.55)}
 @media (min-width:640px){#previewCanvas{max-height:43vh}}
 @media (min-width:1024px){#previewCanvas{max-height:100%}}
 #heicLoadingOverlay{background:color-mix(in srgb,var(--panel) 92%,transparent)!important;border:1px solid var(--line)!important;backdrop-filter:none!important}
 #heicLoadingOverlay>div:first-child{border-color:var(--line)!important;border-top-color:var(--accent)!important}
-#dragOverlay{background:rgba(5,8,15,.9)!important;border-color:var(--accent)!important}
-#dragOverlay *{color:#F1F5FB!important}
-#dragOverlay>div:first-child{background:transparent!important;border-color:rgba(231,236,233,.4)!important}
+#dragOverlay{background:rgba(12,12,12,.94)!important;border-color:var(--accent)!important}
+#dragOverlay *{color:#F5F5F5!important}
+#dragOverlay>div:first-child{background:transparent!important;border-color:rgba(245,245,245,.4)!important}
 #toastContainer>div{border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.15)}
 
 /* quick preset strip */
@@ -131,7 +131,7 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
 </style>
 
 </head>
-<body class="bg-slate-50 dark:bg-[#0B0D10] text-slate-900 dark:text-slate-100 font-sans antialiased selection:bg-indigo-500/30 selection:text-indigo-700 dark:selection:text-indigo-200 overflow-x-hidden transition-colors duration-200">
+<body class="bg-slate-50 dark:bg-[#0B0D10] text-slate-900 dark:text-slate-100 font-sans antialiased selection:bg-neutral-500/30 selection:text-neutral-700 dark:selection:text-neutral-200 overflow-x-hidden transition-colors duration-200">
 
   <!-- Hidden File Input (Supports JPG, PNG, WEBP, HEIC, HEIF) -->
   <input
@@ -148,12 +148,23 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
   <header class="lg:sticky lg:top-0 z-30 h-16 bg-white/90 dark:bg-[#0B0D10]/90 backdrop-blur-md border-b border-slate-200 dark:border-[#262B36] px-4 lg:px-6 flex items-center justify-between gap-3 transition-colors duration-200">
     <!-- Brand -->
     <div class="flex items-center gap-3 min-w-0">
-      <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 shrink-0">
-        <i data-lucide="aperture" class="w-5 h-5 text-white"></i>
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-neutral-700 to-neutral-900 flex items-center justify-center shadow-lg shadow-neutral-500/20 shrink-0">
+        <svg viewBox="0 0 64 64" role="img" aria-label="FrameEX cat holding a photo frame">
+          <rect width="64" height="64" rx="14" fill="#fff" />
+          <path d="M13.5 32.5 15.5 10 28 18.5c2.6-.7 5.4-.7 8 0L48.5 10l2 22.5c0 10.3-8.3 17-18.5 17s-18.5-6.7-18.5-17Z" fill="#151515" />
+          <circle cx="25" cy="28" r="1.5" fill="#fff" />
+          <circle cx="39" cy="28" r="1.5" fill="#fff" />
+          <path d="M30.3 33.1c0-1 1.7-2.2 1.7-2.2s1.7 1.2 1.7 2.2S33 35 32 35s-1.7-.9-1.7-1.9Z" fill="#fff" />
+          <rect x="9" y="35" width="46" height="23" rx="3" fill="#fff" stroke="#151515" stroke-width="4" />
+          <circle cx="45" cy="42" r="2.7" fill="#151515" />
+          <path d="m14 54 10-10 8 8 6-6 12 10" fill="none" stroke="#151515" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M14 39v-4c0-3 2-5 4.8-5s4.8 2 4.8 5v4H14Z" fill="#151515" />
+          <path d="M40.4 39v-4c0-3 2-5 4.8-5S50 32 50 35v4h-9.6Z" fill="#151515" />
+        </svg>
       </div>
       <div class="flex items-center gap-2 min-w-0">
         <h1 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-white truncate">FramEX</h1>
-          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25 shrink-0" title="Photos are processed locally and never uploaded">
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-neutral-500/10 text-neutral-700 dark:text-neutral-300 border border-neutral-500/25 shrink-0" title="Photos are processed locally and never uploaded">
             Browser-only
         </span>
       </div>
@@ -170,10 +181,10 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
         aria-label="Switch Light or Dark Mode"
       >
         <i id="iconSun" data-lucide="sun" class="w-4 h-4 text-amber-500"></i>
-        <i id="iconMoon" data-lucide="moon" class="w-4 h-4 text-indigo-500 hidden"></i>
+        <i id="iconMoon" data-lucide="moon" class="w-4 h-4 text-neutral-500 hidden"></i>
       </button>
 
-        <button
+      <button
         id="btnSampleHeader"
         type="button"
         class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 hover:bg-slate-200 dark:bg-[#1A1E26] dark:hover:bg-[#222732] text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-[#262B36] transition cursor-pointer"
@@ -184,12 +195,25 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
       </button>
 
       <button
+        id="btnRemovePhoto"
+        type="button"
+        disabled
+        class="inline-flex items-center justify-center w-9 h-9 rounded-lg text-slate-600 dark:text-slate-300 bg-slate-100 hover:bg-slate-200 dark:bg-[#1A1E26] dark:hover:bg-[#222732] border border-slate-200 dark:border-[#262B36] transition cursor-pointer disabled:opacity-40 disabled:pointer-events-none"
+        title="Hapus foto saat ini"
+        aria-label="Hapus foto saat ini"
+      >
+        <i data-lucide="trash-2" class="w-4 h-4"></i>
+      </button>
+
+      <button
         id="btnUploadHeader"
         type="button"
-        class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/20 transition cursor-pointer"
+        class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold bg-neutral-600 hover:bg-neutral-500 text-white shadow-md shadow-neutral-600/20 transition cursor-pointer"
+        title="Upload photo"
+        aria-label="Upload photo"
       >
         <i data-lucide="upload" class="w-3.5 h-3.5"></i>
-        <span>Upload Photo</span>
+        <span class="hidden sm:inline">Upload Photo</span>
       </button>
     </div>
   </header>
@@ -206,7 +230,7 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
       <div class="relative z-10 flex flex-wrap items-center justify-between gap-1.5 mb-2 min-w-0">
         <div class="flex items-center gap-1.5 flex-wrap min-w-0">
           <!-- Detected Source Format Badge -->
-          <div id="formatBadge" class="hidden items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-[11px] font-mono font-semibold bg-indigo-500/15 border border-indigo-500/30 text-indigo-700 dark:text-indigo-300 backdrop-blur-sm">
+          <div id="formatBadge" class="hidden items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-[11px] font-mono font-semibold bg-neutral-500/15 border border-neutral-500/30 text-neutral-700 dark:text-neutral-300 backdrop-blur-sm">
             <span id="formatText">JPEG</span>
           </div>
 
@@ -219,7 +243,7 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
 
         <!-- Output Resolution Pill -->
         <div id="resolutionBadge" class="hidden shrink-0 items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-[11px] font-mono bg-white/90 dark:bg-[#14171D]/90 border border-slate-200 dark:border-[#262B36] text-slate-700 dark:text-slate-300 backdrop-blur-sm shadow-sm">
-          <i data-lucide="maximize-2" class="w-3 h-3 text-indigo-500 dark:text-indigo-400"></i>
+          <i data-lucide="maximize-2" class="w-3 h-3 text-neutral-500 dark:text-neutral-400"></i>
           <span id="resolutionText">0 × 0 px</span>
         </div>
       </div>
@@ -230,9 +254,9 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
         <!-- Initial Empty State Dropzone Card -->
         <div
           id="emptyDropCard"
-          class="w-full max-w-lg rounded-2xl bg-white/95 dark:bg-[#14171D]/95 border-2 border-dashed border-slate-300 dark:border-[#2E3545] hover:border-indigo-500/70 p-4 sm:p-8 text-center transition-all duration-200 shadow-xl dark:shadow-2xl"
+          class="w-full max-w-lg rounded-2xl bg-white/95 dark:bg-[#14171D]/95 border-2 border-dashed border-slate-300 dark:border-[#2E3545] hover:border-neutral-500/70 p-4 sm:p-8 text-center transition-all duration-200 shadow-xl dark:shadow-2xl"
         >
-          <div class="w-10 h-10 sm:w-14 sm:h-14 mx-auto mb-2.5 sm:mb-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+          <div class="w-10 h-10 sm:w-14 sm:h-14 mx-auto mb-2.5 sm:mb-4 rounded-2xl bg-neutral-500/10 border border-neutral-500/20 flex items-center justify-center text-neutral-600 dark:text-neutral-400">
             <i data-lucide="image-plus" class="w-5 h-5 sm:w-7 sm:h-7"></i>
           </div>
           <h2 class="text-sm sm:text-xl font-bold text-slate-900 dark:text-white mb-1 sm:mb-2">Drop a photo here</h2>
@@ -244,7 +268,7 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
             <button
               id="btnUploadEmpty"
               type="button"
-              class="inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/25 transition cursor-pointer"
+              class="inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-neutral-600 hover:bg-neutral-500 text-white shadow-lg shadow-neutral-600/25 transition cursor-pointer"
             >
               <i data-lucide="folder-open" class="w-4 h-4"></i>
               <span>Select Photo</span>
@@ -273,9 +297,9 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
         <!-- HEIC / HEIF Client-Side Decoding Spinner Overlay -->
         <div
           id="heicLoadingOverlay"
-          class="hidden absolute inset-0 z-30 rounded-2xl bg-white/90 dark:bg-[#0B0D10]/85 backdrop-blur-md border border-indigo-500/30 flex-col items-center justify-center text-center p-4"
+          class="hidden absolute inset-0 z-30 rounded-2xl bg-white/90 dark:bg-[#0B0D10]/85 backdrop-blur-md border border-neutral-500/30 flex-col items-center justify-center text-center p-4"
         >
-          <div class="w-10 h-10 rounded-full border-2 border-indigo-500/30 border-t-indigo-500 dark:border-t-indigo-400 animate-spin mb-3"></div>
+          <div class="w-10 h-10 rounded-full border-2 border-neutral-500/30 border-t-neutral-500 dark:border-t-neutral-400 animate-spin mb-3"></div>
           <p class="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">Converting HEIC file &amp; reading EXIF...</p>
           <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Processed locally in your browser</p>
         </div>
@@ -283,13 +307,13 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
         <!-- Drag-Over Active Overlay -->
         <div
           id="dragOverlay"
-          class="hidden absolute inset-0 z-20 rounded-2xl bg-indigo-950/80 backdrop-blur-sm border-2 border-dashed border-indigo-400 flex-col items-center justify-center text-center p-6 pointer-events-none"
+          class="hidden absolute inset-0 z-20 rounded-2xl bg-neutral-950/80 backdrop-blur-sm border-2 border-dashed border-neutral-400 flex-col items-center justify-center text-center p-6 pointer-events-none"
         >
-          <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 border border-indigo-400/40 flex items-center justify-center text-indigo-300 mb-2 animate-bounce">
+          <div class="w-12 h-12 rounded-2xl bg-neutral-500/20 border border-neutral-400/40 flex items-center justify-center text-neutral-300 mb-2 animate-bounce">
             <i data-lucide="download-cloud" class="w-6 h-6"></i>
           </div>
           <p class="text-sm sm:text-lg font-bold text-white">Drop photo to frame immediately</p>
-          <p class="text-xs text-indigo-200 mt-1">JPG, PNG, WEBP, HEIC, or HEIF supported</p>
+          <p class="text-xs text-neutral-200 mt-1">JPG, PNG, WEBP, HEIC, or HEIF supported</p>
         </div>
       </div>
 
@@ -324,7 +348,7 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
         <div data-section="presets" class="inspector-section rounded-xl bg-slate-50/90 dark:bg-[#1A1E26] border border-slate-200 dark:border-[#262B36] overflow-hidden">
           <button type="button" class="accordion-trigger w-full px-4 py-3 flex items-center justify-between text-left hover:bg-slate-100 dark:hover:bg-[#202530] transition cursor-pointer">
             <div class="flex items-center gap-2">
-              <i data-lucide="layout-template" class="w-4 h-4 text-indigo-500 dark:text-indigo-400"></i>
+              <i data-lucide="layout-template" class="w-4 h-4 text-neutral-500 dark:text-neutral-400"></i>
               <span class="text-[13px] font-semibold text-slate-800 dark:text-slate-200">Frame Presets &amp; Ratio</span>
             </div>
             <i data-lucide="chevron-down" class="accordion-chevron w-4 h-4 text-slate-500 dark:text-slate-400 transition-transform duration-200"></i>
@@ -368,7 +392,7 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
                     <div class="w-full h-5 bg-neutral-700 rounded-[2px]"></div>
                     <div class="flex justify-between items-center px-0.5">
                       <span class="w-3 h-0.5 bg-white"></span>
-                      <span class="w-2 h-0.5 bg-amber-400"></span>
+                      <span class="w-2 h-0.5 bg-neutral-300"></span>
                     </div>
                   </div>
                   <div>
@@ -385,13 +409,13 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
                   <div class="swatch w-9 h-9 rounded-lg bg-[#FAFAFA] border border-slate-300 flex flex-col justify-between p-1 shrink-0">
                     <div class="w-full h-5 bg-zinc-800 rounded-[2px]"></div>
                     <div class="flex items-center gap-1 px-0.5">
-                      <span class="w-1.5 h-1.5 rounded-full bg-red-600"></span>
+                      <span class="w-1.5 h-1.5 rounded-full bg-neutral-800"></span>
                       <span class="w-4 h-0.5 bg-zinc-800"></span>
                     </div>
                   </div>
                   <div>
                     <div class="text-xs font-semibold text-slate-900 dark:text-white">Leica Minimal</div>
-                    <div class="text-[11px] text-slate-500 dark:text-slate-400">Signature red dot accent &amp; refined spacing</div>
+                    <div class="text-[11px] text-slate-500 dark:text-slate-400">Monochrome dot accent &amp; refined spacing</div>
                   </div>
                 </div>
                 <span class="preset-check w-4 h-4 rounded-full border border-slate-400 dark:border-slate-600 flex items-center justify-center shrink-0"></span>
@@ -400,7 +424,7 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
               <!-- Blur Backdrop -->
               <button type="button" data-preset="blur" class="preset-card group flex items-center justify-between p-2.5 rounded-xl border text-left transition cursor-pointer">
                 <div class="flex items-center gap-3">
-                  <div class="swatch w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-900 via-slate-800 to-amber-900 border border-slate-600 flex flex-col justify-between p-1.5 shrink-0">
+                  <div class="swatch w-9 h-9 rounded-lg bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-700 border border-slate-600 flex flex-col justify-between p-1.5 shrink-0">
                     <div class="w-full h-4 bg-slate-200/90 rounded-[2px] shadow"></div>
                     <div class="w-5 h-0.5 bg-white/80 mx-auto"></div>
                   </div>
@@ -462,7 +486,7 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
                 id="inputCamera"
                 type="text"
                 placeholder="FUJIFILM X100VI"
-                class="w-full px-3 py-2 rounded-lg bg-white dark:bg-[#0F1217] border border-slate-200 dark:border-[#262B36] focus:border-indigo-500 focus:outline-none text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 transition"
+                class="w-full px-3 py-2 rounded-lg bg-white dark:bg-[#0F1217] border border-slate-200 dark:border-[#262B36] focus:border-neutral-500 focus:outline-none text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 transition"
               />
             </div>
 
@@ -473,7 +497,7 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
                 id="inputLensFocal"
                 type="text"
                 placeholder="23mm f/2.0"
-                class="w-full px-3 py-2 rounded-lg bg-white dark:bg-[#0F1217] border border-slate-200 dark:border-[#262B36] focus:border-indigo-500 focus:outline-none text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 transition"
+                class="w-full px-3 py-2 rounded-lg bg-white dark:bg-[#0F1217] border border-slate-200 dark:border-[#262B36] focus:border-neutral-500 focus:outline-none text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 transition"
               />
             </div>
 
@@ -485,7 +509,7 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
                   id="inputAperture"
                   type="text"
                   placeholder="f/2.0"
-                  class="w-full px-2.5 py-2 rounded-lg bg-white dark:bg-[#0F1217] border border-slate-200 dark:border-[#262B36] focus:border-indigo-500 focus:outline-none text-xs font-mono text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 transition"
+                  class="w-full px-2.5 py-2 rounded-lg bg-white dark:bg-[#0F1217] border border-slate-200 dark:border-[#262B36] focus:border-neutral-500 focus:outline-none text-xs font-mono text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 transition"
                 />
               </div>
               <div>
@@ -494,7 +518,7 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
                   id="inputShutter"
                   type="text"
                   placeholder="1/1000s"
-                  class="w-full px-2.5 py-2 rounded-lg bg-white dark:bg-[#0F1217] border border-slate-200 dark:border-[#262B36] focus:border-indigo-500 focus:outline-none text-xs font-mono text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 transition"
+                  class="w-full px-2.5 py-2 rounded-lg bg-white dark:bg-[#0F1217] border border-slate-200 dark:border-[#262B36] focus:border-neutral-500 focus:outline-none text-xs font-mono text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 transition"
                 />
               </div>
               <div>
@@ -503,7 +527,7 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
                   id="inputIso"
                   type="text"
                   placeholder="ISO 160"
-                  class="w-full px-2.5 py-2 rounded-lg bg-white dark:bg-[#0F1217] border border-slate-200 dark:border-[#262B36] focus:border-indigo-500 focus:outline-none text-xs font-mono text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 transition"
+                  class="w-full px-2.5 py-2 rounded-lg bg-white dark:bg-[#0F1217] border border-slate-200 dark:border-[#262B36] focus:border-neutral-500 focus:outline-none text-xs font-mono text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 transition"
                 />
               </div>
             </div>
@@ -516,7 +540,7 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
                   id="inputCaptureDate"
                   type="text"
                   placeholder="2026.11.13"
-                  class="w-full px-2.5 py-2 rounded-lg bg-white dark:bg-[#0F1217] border border-slate-200 dark:border-[#262B36] focus:border-indigo-500 focus:outline-none text-xs font-mono text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 transition"
+                  class="w-full px-2.5 py-2 rounded-lg bg-white dark:bg-[#0F1217] border border-slate-200 dark:border-[#262B36] focus:border-neutral-500 focus:outline-none text-xs font-mono text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 transition"
                 />
               </div>
               <div>
@@ -528,7 +552,7 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
                   id="inputLocation"
                   type="text"
                   placeholder="EXIF GPS or custom note"
-                  class="w-full px-2.5 py-2 rounded-lg bg-white dark:bg-[#0F1217] border border-slate-200 dark:border-[#262B36] focus:border-indigo-500 focus:outline-none text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 transition"
+                  class="w-full px-2.5 py-2 rounded-lg bg-white dark:bg-[#0F1217] border border-slate-200 dark:border-[#262B36] focus:border-neutral-500 focus:outline-none text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 transition"
                 />
                 <p class="mt-1 text-[10px] leading-relaxed text-amber-700 dark:text-amber-300/80">GPS may reveal your exact location. Clear this field before sharing if needed.</p>
               </div>
@@ -540,7 +564,7 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
         <div data-section="style" class="inspector-section rounded-xl bg-slate-50/90 dark:bg-[#1A1E26] border border-slate-200 dark:border-[#262B36] overflow-hidden">
           <div class="px-4 py-3 flex items-center justify-between hover:bg-slate-100 dark:hover:bg-[#202530] transition">
             <button type="button" class="accordion-trigger flex-1 flex items-center gap-2 text-left cursor-pointer">
-              <i data-lucide="sliders-horizontal" class="w-4 h-4 text-indigo-500 dark:text-indigo-400"></i>
+              <i data-lucide="sliders-horizontal" class="w-4 h-4 text-neutral-500 dark:text-neutral-400"></i>
               <span class="text-[13px] font-semibold text-slate-800 dark:text-slate-200">Frame &amp; Typography</span>
             </button>
             <div class="flex items-center gap-2">
@@ -583,7 +607,7 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
               <div>
                 <div class="flex justify-between items-center mb-1">
                   <label for="sliderPadding" class="text-[11px] font-medium text-slate-600 dark:text-slate-400">Border Padding</label>
-                  <span id="valPadding" class="text-[11px] font-mono text-indigo-600 dark:text-indigo-400">1.05×</span>
+                  <span id="valPadding" class="text-[11px] font-mono text-neutral-600 dark:text-neutral-400">1.05×</span>
                 </div>
                 <input id="sliderPadding" type="range" min="0.5" max="2.0" step="0.05" value="1.05" class="studio-slider" />
               </div>
@@ -592,7 +616,7 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
               <div>
                 <div class="flex justify-between items-center mb-1">
                   <label for="sliderRadius" class="text-[11px] font-medium text-slate-600 dark:text-slate-400">Photo Corner Radius</label>
-                  <span id="valRadius" class="text-[11px] font-mono text-indigo-600 dark:text-indigo-400">0 px</span>
+                  <span id="valRadius" class="text-[11px] font-mono text-neutral-600 dark:text-neutral-400">0 px</span>
                 </div>
                 <input id="sliderRadius" type="range" min="0" max="28" step="1" value="0" class="studio-slider" />
               </div>
@@ -601,7 +625,7 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
               <div>
                 <div class="flex justify-between items-center mb-1">
                   <label for="sliderFontScale" class="text-[11px] font-medium text-slate-600 dark:text-slate-400">Font Scale</label>
-                  <span id="valFontScale" class="text-[11px] font-mono text-indigo-600 dark:text-indigo-400">0.95×</span>
+                  <span id="valFontScale" class="text-[11px] font-mono text-neutral-600 dark:text-neutral-400">0.95×</span>
                 </div>
                 <input id="sliderFontScale" type="range" min="0.75" max="1.4" step="0.05" value="0.95" class="studio-slider" />
               </div>
@@ -611,30 +635,30 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
             <div class="pt-3 border-t border-slate-200 dark:border-[#262B36] grid grid-cols-2 gap-2.5">
               <label class="flex items-center justify-between p-2.5 rounded-lg bg-white dark:bg-[#0F1217] border border-slate-200 dark:border-[#262B36] cursor-pointer hover:border-slate-400 dark:hover:border-slate-600 transition">
                 <span class="text-xs text-slate-700 dark:text-slate-300">Show Date</span>
-                <input id="toggleShowDate" type="checkbox" checked class="accent-indigo-500 w-4 h-4 rounded cursor-pointer" />
+                <input id="toggleShowDate" type="checkbox" checked class="accent-neutral-500 w-4 h-4 rounded cursor-pointer" />
               </label>
 
               <label class="flex items-center justify-between p-2.5 rounded-lg bg-white dark:bg-[#0F1217] border border-slate-200 dark:border-[#262B36] cursor-pointer hover:border-slate-400 dark:hover:border-slate-600 transition">
                 <span class="text-xs text-slate-700 dark:text-slate-300">Location / Note</span>
-                <input id="toggleLocation" type="checkbox" checked class="accent-indigo-500 w-4 h-4 rounded cursor-pointer" />
+                <input id="toggleLocation" type="checkbox" checked class="accent-neutral-500 w-4 h-4 rounded cursor-pointer" />
               </label>
 
               <label class="flex items-center justify-between p-2.5 rounded-lg bg-white dark:bg-[#0F1217] border border-slate-200 dark:border-[#262B36] cursor-pointer hover:border-slate-400 dark:hover:border-slate-600 transition">
                 <span class="text-xs text-slate-700 dark:text-slate-300">Accent Dot</span>
-                <input id="toggleAccentDot" type="checkbox" checked class="accent-indigo-500 w-4 h-4 rounded cursor-pointer" />
+                <input id="toggleAccentDot" type="checkbox" checked class="accent-neutral-500 w-4 h-4 rounded cursor-pointer" />
               </label>
 
               <label class="flex items-center justify-between p-2.5 rounded-lg bg-white dark:bg-[#0F1217] border border-slate-200 dark:border-[#262B36] cursor-pointer hover:border-slate-400 dark:hover:border-slate-600 transition">
                 <span class="text-xs text-slate-700 dark:text-slate-300">Drop Shadow</span>
-                <input id="toggleDropShadow" type="checkbox" class="accent-indigo-500 w-4 h-4 rounded cursor-pointer" />
+                <input id="toggleDropShadow" type="checkbox" class="accent-neutral-500 w-4 h-4 rounded cursor-pointer" />
               </label>
               <label class="flex items-center justify-between p-2.5 rounded-lg bg-white dark:bg-[#0F1217] border border-slate-200 dark:border-[#262B36] cursor-pointer hover:border-slate-400 dark:hover:border-slate-600 transition">
                 <span class="text-xs text-slate-700 dark:text-slate-300">Brand Mark</span>
-                <input id="toggleBrand" type="checkbox" checked class="accent-indigo-500 w-4 h-4 rounded cursor-pointer" />
+                <input id="toggleBrand" type="checkbox" checked class="accent-neutral-500 w-4 h-4 rounded cursor-pointer" />
               </label>
               <label class="flex items-center justify-between p-2.5 rounded-lg bg-white dark:bg-[#0F1217] border border-slate-200 dark:border-[#262B36] cursor-pointer hover:border-slate-400 dark:hover:border-slate-600 transition">
                 <span class="text-xs text-slate-700 dark:text-slate-300">Exposure</span>
-                <input id="toggleExposure" type="checkbox" checked class="accent-indigo-500 w-4 h-4 rounded cursor-pointer" />
+                <input id="toggleExposure" type="checkbox" checked class="accent-neutral-500 w-4 h-4 rounded cursor-pointer" />
               </label>
             </div>
           </div>
@@ -659,7 +683,7 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
               id="btnDownloadJpg"
               type="button"
               disabled
-              class="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:pointer-events-none text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20 transition cursor-pointer"
+              class="w-full py-2.5 px-4 rounded-xl bg-neutral-600 hover:bg-neutral-500 disabled:opacity-40 disabled:pointer-events-none text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-lg shadow-neutral-600/20 transition cursor-pointer"
             >
               <i data-lucide="download" class="w-4 h-4"></i>
               <span>Download JPG (95% Quality)</span>
@@ -766,7 +790,7 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
             textPrimary: '#0F172A',
             textSecondary: '#64748B',
             divider: '#E2E8F0',
-            accent: '#E11D48',
+            accent: '#27272A',
             footerScale: 1.0
           },
           darkroom: {
@@ -774,7 +798,7 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
             textPrimary: '#F8FAFC',
             textSecondary: '#94A3B8',
             divider: '#27272A',
-            accent: '#F59E0B',
+            accent: '#E4E4E7',
             footerScale: 1.0
           },
           leica: {
@@ -782,15 +806,15 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
             textPrimary: '#18181B',
             textSecondary: '#71717A',
             divider: '#E4E4E7',
-            accent: '#DC2626',
+            accent: '#27272A',
             footerScale: 1.05
           },
           blur: {
-            bg: '#0F172A',
+            bg: '#111113',
             textPrimary: '#FFFFFF',
             textSecondary: 'rgba(255, 255, 255, 0.78)',
             divider: 'rgba(255, 255, 255, 0.22)',
-            accent: '#38BDF8',
+            accent: '#F4F4F5',
             footerScale: 1.05
           },
           retro: {
@@ -798,7 +822,7 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
             textPrimary: '#292524',
             textSecondary: '#78716C',
             divider: '#D6D3D1',
-            accent: '#D97706',
+            accent: '#52525B',
             footerScale: 1.25
           }
         };
@@ -826,6 +850,7 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
           btnUploadHeader: document.getElementById('btnUploadHeader'),
           btnUploadEmpty: document.getElementById('btnUploadEmpty'),
           btnSampleHeader: document.getElementById('btnSampleHeader'),
+          btnRemovePhoto: document.getElementById('btnRemovePhoto'),
           btnSampleEmpty: document.getElementById('btnSampleEmpty'),
           btnDownloadJpg: document.getElementById('btnDownloadJpg'),
           btnDownloadPng: document.getElementById('btnDownloadPng'),
@@ -937,11 +962,11 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
               text: 'EXIF Auto-Detected'
             },
             missing: {
-              dot: 'bg-amber-400',
+              dot: 'bg-neutral-300',
               text: 'No EXIF • Manual Edit'
             },
             sample: {
-              dot: 'bg-indigo-400',
+              dot: 'bg-neutral-400',
               text: 'Sample EXIF Loaded'
             }
           };
@@ -1022,6 +1047,49 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
           const hasImage = Boolean(state.image);
           el.btnResetMetadata.disabled = !hasImage;
           el.btnResetStyle.disabled = !hasImage;
+          el.btnRemovePhoto.disabled = !hasImage;
+        }
+
+        /**
+         * Remove the active photo and return to the empty import state.
+         * Keep the frame styling preferences so another photo can be tried with the same setup.
+         */
+        function clearCurrentPhoto() {
+          if (!state.image) return;
+
+          if (renderRafId) {
+            cancelAnimationFrame(renderRafId);
+            renderRafId = null;
+          }
+
+          state.image = null;
+          state.fileName = 'photo-exif';
+          state.sourceFormat = '';
+          state.exifStatus = 'idle';
+          state.hasGpsTag = false;
+          state.metadata = { ...DEFAULT_METADATA };
+          state.originalMetadata = { ...DEFAULT_METADATA };
+          cachedBlurCanvas = null;
+          cachedBlurKey = '';
+          el.fileInput.value = '';
+
+          el.previewCanvas.width = 0;
+          el.previewCanvas.height = 0;
+          el.emptyDropCard.classList.remove('hidden');
+          el.canvasContainer.classList.add('hidden');
+          el.canvasContainer.classList.remove('flex');
+          el.btnDownloadJpg.disabled = true;
+          el.btnDownloadPng.disabled = true;
+          el.btnShareImage.disabled = true;
+          el.resolutionBadge.classList.add('hidden');
+          el.resolutionBadge.classList.remove('inline-flex');
+          el.resolutionText.textContent = '0 × 0 px';
+
+          updateFormatBadge();
+          updateExifBadge();
+          syncInputsFromState();
+          updateResetAvailability();
+          showToast('Foto dihapus dari pratinjau. Pengaturan bingkai tetap tersimpan.', 'info');
         }
 
         /**
@@ -1884,6 +1952,9 @@ input[type=range].studio-slider::-moz-range-thumb{width:14px;height:14px;border-
           [el.btnSampleHeader, el.btnSampleEmpty].forEach(btn => {
             btn.addEventListener('click', loadSamplePhoto);
           });
+
+          // Remove the current photo without resetting frame styling preferences
+          el.btnRemovePhoto.addEventListener('click', clearCurrentPhoto);
 
           // Reset EXIF Metadata to original detected values
           el.btnResetMetadata.addEventListener('click', (e) => {

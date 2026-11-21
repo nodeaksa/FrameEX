@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">FrameEX cat holding a photo frame</title>
+  <desc id="desc">A simple black cat peeking over and holding a small photo frame on a white rounded square.</desc>
+  <rect width="64" height="64" rx="14" fill="#fff"/>
+
+  <!-- Cat head with pointed ears -->
+  <path d="M13.5 32.5 15.5 10 28 18.5c2.6-.7 5.4-.7 8 0L48.5 10l2 22.5c0 10.3-8.3 17-18.5 17s-18.5-6.7-18.5-17Z" fill="#151515"/>
+  <circle cx="25" cy="28" r="1.5" fill="#fff"/>
+  <circle cx="39" cy="28" r="1.5" fill="#fff"/>
+  <path d="M30.3 33.1c0-1 1.7-2.2 1.7-2.2s1.7 1.2 1.7 2.2S33 35 32 35s-1.7-.9-1.7-1.9Z" fill="#fff"/>
+
+  <!-- Small photo frame with a simple landscape -->
+  <rect x="9" y="35" width="46" height="23" rx="3" fill="#fff" stroke="#151515" stroke-width="4"/>
+  <circle cx="45" cy="42" r="2.7" fill="#151515"/>
+  <path d="m14 54 10-10 8 8 6-6 12 10" fill="none" stroke="#151515" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Paws resting over the top edge of the frame -->
+  <path d="M14 39v-4c0-3 2-5 4.8-5s4.8 2 4.8 5v4H14Z" fill="#151515"/>
+  <path d="M40.4 39v-4c0-3 2-5 4.8-5S50 32 50 35v4h-9.6Z" fill="#151515"/>
+</svg>
